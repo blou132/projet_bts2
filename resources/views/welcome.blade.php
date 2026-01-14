@@ -254,18 +254,25 @@
                                 </div>
                             </div>
                         </div>
-                        <form class="contact-form card" data-animate method="get" action="#">
+                        <form class="contact-form card" data-animate method="post" action="{{ route('contact.submit') }}">
+                            @csrf
+                            @if (session('contact_success'))
+                                <div class="auth-success">{{ session('contact_success') }}</div>
+                            @endif
+                            @if ($errors->any())
+                                <div class="auth-error">{{ $errors->first() }}</div>
+                            @endif
                             <div>
                                 <label for="name">Nom</label>
-                                <input id="name" name="name" type="text" placeholder="Votre nom">
+                                <input id="name" name="name" type="text" placeholder="Votre nom" value="{{ old('name') }}" required>
                             </div>
                             <div>
                                 <label for="phone">Téléphone</label>
-                                <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="14" maxlength="14" pattern="[0-9]{2}( [0-9]{2}){4}" placeholder="06 12 34 56 78">
+                                <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="14" maxlength="14" pattern="[0-9]{2}( [0-9]{2}){4}" placeholder="06 12 34 56 78" value="{{ old('phone') }}" required>
                             </div>
                             <div>
                                 <label for="message">Message</label>
-                                <textarea id="message" name="message" placeholder="Expliquez votre besoin"></textarea>
+                                <textarea id="message" name="message" placeholder="Expliquez votre besoin" required>{{ old('message') }}</textarea>
                             </div>
                             <button class="btn btn-primary" type="submit">Envoyer la demande</button>
                         </form>

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -38,8 +39,42 @@ Route::get('/admin', function (Request $request) {
         return redirect()->route('login');
     }
 
-    return view('admin.index');
+    $requests = DB::table('contact_requests')
+        ->orderByDesc('created_at')
+        ->get();
+
+    return view('admin.index', ['requests' => $requests]);
 })->name('admin');
+
+Route::post('/contact', function (Request $request) {
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:120'],
+        'phone' => ['required', 'string', 'regex:/^[0-9]{2}( [0-9]{2}){4}$/'],
+        'message' => ['required', 'string', 'max:2000'],
+    ]);
+
+    DB::table('contact_requests')->insert([
+        'name' => $validated['name'],
+        'phone' => $validated['phone'],
+        'message' => $validated['message'],
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    return redirect()->to(route('home') . '#contact')
+        ->with('contact_success', 'Votre demande a bien été envoyée.');
+})->name('contact.submit');
+
+Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
+    if (!$request->session()->get('is_admin')) {
+        return redirect()->route('login');
+    }
+
+    DB::table('contact_requests')->where('id', $id)->delete();
+
+    return redirect()->route('admin')
+        ->with('admin_status', 'Demande supprimée.');
+})->name('admin.requests.delete');
 
 Route::post('/logout', function (Request $request) {
     $request->session()->forget('is_admin');

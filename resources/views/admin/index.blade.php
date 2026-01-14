@@ -35,11 +35,44 @@
             </div>
         </div>
 
-        <main id="main" class="auth-page">
-            <div class="auth-card">
-                <h1>Espace admin</h1>
-                <p class="auth-lead">Fonctionnalités à venir.</p>
-                <a class="btn btn-primary" href="{{ route('home') }}">Retour à l'accueil</a>
+        <main id="main" class="admin-page">
+            <div class="container">
+                <header class="admin-header">
+                    <div>
+                        <h1>Demandes clients</h1>
+                        <p class="admin-lead">Liste des demandes reçues via le formulaire.</p>
+                    </div>
+                    <a class="btn btn-ghost" href="{{ route('home') }}#contact">Voir le formulaire</a>
+                </header>
+
+                @if (session('admin_status'))
+                    <div class="auth-success">{{ session('admin_status') }}</div>
+                @endif
+
+                @if ($requests->isEmpty())
+                    <div class="admin-empty">
+                        <p>Aucune demande pour le moment.</p>
+                    </div>
+                @else
+                    <div class="admin-list">
+                        @foreach ($requests as $request)
+                            <article class="admin-card">
+                                <div class="admin-card__header">
+                                    <div>
+                                        <h2>{{ $request->name }}</h2>
+                                        <p class="admin-meta">{{ $request->phone }} · {{ \Illuminate\Support\Carbon::parse($request->created_at)->format('d/m/Y H:i') }}</p>
+                                    </div>
+                                    <form method="post" action="{{ route('admin.requests.delete', $request->id) }}" onsubmit="return confirm('Supprimer cette demande ?');">
+                                        @csrf
+                                        @method('delete')
+                                        <button class="btn btn-ghost" type="submit">Supprimer</button>
+                                    </form>
+                                </div>
+                                <p class="admin-message">{{ $request->message }}</p>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </main>
     </body>
