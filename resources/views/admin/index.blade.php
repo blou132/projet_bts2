@@ -39,11 +39,32 @@
             <div class="container">
                 <header class="admin-header">
                     <div>
-                        <h1>Demandes clients</h1>
-                        <p class="admin-lead">Liste des demandes reçues via le formulaire.</p>
+                        <h1>{{ $searchMode ? 'Résultats de recherche' : 'Demandes clients' }}</h1>
+                        <p class="admin-lead">
+                            @if ($searchMode)
+                                Résultats pour « {{ $searchQuery }} ».
+                            @else
+                                Suivi des demandes reçues via le formulaire.
+                            @endif
+                        </p>
                     </div>
-                    <a class="btn btn-ghost" href="{{ route('home') }}#contact">Voir le formulaire</a>
                 </header>
+
+                <div class="admin-toolbar">
+                    <nav class="admin-tabs" aria-label="Navigation des demandes">
+                        <a class="admin-tab {{ $activeStatus === 'pending' ? 'is-active' : '' }}" href="{{ route('admin') }}">Demandes</a>
+                        <a class="admin-tab {{ $activeStatus === 'in_progress' ? 'is-active' : '' }}" href="{{ route('admin.in_progress') }}">En cours</a>
+                        <a class="admin-tab {{ $activeStatus === 'done' ? 'is-active' : '' }}" href="{{ route('admin.done') }}">Terminé</a>
+                    </nav>
+                    <form class="admin-search" method="get" action="{{ route('admin.search') }}">
+                        <label for="admin-search" class="sr-only">Rechercher</label>
+                        <input id="admin-search" name="q" type="search" placeholder="Rechercher un client ou un téléphone" value="{{ $searchQuery }}">
+                        <button class="btn btn-ghost" type="submit">Rechercher</button>
+                        @if ($searchMode)
+                            <a class="btn btn-ghost" href="{{ route('admin') }}">Réinitialiser</a>
+                        @endif
+                    </form>
+                </div>
 
                 @if (session('admin_status'))
                     <div class="auth-success">{{ session('admin_status') }}</div>
@@ -51,12 +72,12 @@
 
                 @if ($requests->isEmpty())
                     <div class="admin-empty">
-                        <p>Aucune demande pour le moment.</p>
+                        <p>{{ $searchMode ? 'Aucune demande ne correspond à cette recherche.' : 'Aucune demande pour le moment.' }}</p>
                     </div>
                 @else
                     <div class="admin-list">
                         @foreach ($requests as $request)
-                            <article class="admin-card">
+                            <article id="request-{{ $request->id }}" class="admin-card {{ $searchMode ? 'admin-card--search' : '' }}" data-status="{{ $request->status }}">
                                 <div class="admin-card__header">
                                     <div>
                                         <h2>{{ $request->name }}</h2>
@@ -69,6 +90,23 @@
                                     </form>
                                 </div>
                                 <p class="admin-message">{{ $request->message }}</p>
+                                <div class="admin-status">
+                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                        @csrf
+                                        <input type="hidden" name="status" value="pending">
+                                        <button class="status-btn status-btn--pending {{ $request->status === 'pending' ? 'is-active' : '' }}" type="submit">Non démarré</button>
+                                    </form>
+                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                        @csrf
+                                        <input type="hidden" name="status" value="in_progress">
+                                        <button class="status-btn status-btn--progress {{ $request->status === 'in_progress' ? 'is-active' : '' }}" type="submit">En cours</button>
+                                    </form>
+                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                        @csrf
+                                        <input type="hidden" name="status" value="done">
+                                        <button class="status-btn status-btn--done {{ $request->status === 'done' ? 'is-active' : '' }}" type="submit">Terminé</button>
+                                    </form>
+                                </div>
                             </article>
                         @endforeach
                     </div>
