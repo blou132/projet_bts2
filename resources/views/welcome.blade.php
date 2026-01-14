@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <div class="hero-visual" data-animate>
-                    <img src="{{ asset('images/hero.jpg') }}" alt="Atelier informatique et réparation de matériel">
+                    <img src="{{ asset('images/hero.jpg') }}" alt="Réparateur informatique en intervention sur un ordinateur">
                     <div class="hero-badge">Intervention à domicile</div>
                     <div class="hero-shape shape-1" aria-hidden="true"></div>
                     <div class="hero-shape shape-2" aria-hidden="true"></div>
@@ -169,14 +169,21 @@
                         </div>
                     </div>
                     <div class="zone-map" data-animate>
-                        <svg viewBox="0 0 600 420" role="img" aria-label="Carte stylisée de la zone d'intervention">
-                            <rect width="600" height="420" rx="32" fill="none" stroke="#f0e1c6" stroke-width="2" />
-                            <path d="M80 120C140 80 240 70 320 120C400 170 460 180 520 140" stroke="#e3c68a" stroke-width="3" fill="none" />
-                            <path d="M60 280C160 230 260 240 360 280C440 310 520 320 560 280" stroke="#f1d9aa" stroke-width="3" fill="none" />
-                            <circle class="pin" cx="300" cy="210" r="12" />
-                            <circle cx="300" cy="210" r="30" fill="none" stroke="#ff9e00" stroke-width="2" opacity="0.6" />
-                            <circle cx="300" cy="210" r="60" fill="none" stroke="#ff9e00" stroke-width="1" opacity="0.4" />
-                        </svg>
+                        <div class="map-shell">
+                            <div id="service-map" class="map-canvas" role="region" aria-label="Carte de la zone d'intervention autour de Ploërmel"></div>
+                            <div class="map-fallback" aria-hidden="true">
+                                <iframe
+                                    title="Carte Google Maps de Ploërmel"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://www.google.com/maps?q=Plo%C3%ABrmel%2C%20France&z=9&output=embed">
+                                </iframe>
+                                <span class="map-radius" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <noscript>
+                            <p>Activez JavaScript pour voir la carte interactive de la zone d'intervention.</p>
+                        </noscript>
                     </div>
                 </div>
             </section>
@@ -209,8 +216,8 @@
                             </div>
                             <div class="contact-card">
                                 <strong>Téléphone</strong>
-                                <a href="tel:+33297930783">02 97 93 07 83</a><br>
-                                <a href="tel:+33614418099">06 14 41 80 99</a>
+                                <a href="tel:+33614418099">06 14 41 80 99</a><br>
+                                <a href="tel:+33297930783">02 97 93 07 83</a>
                             </div>
                             <div class="contact-card">
                                 <strong>Nos horaires</strong>
@@ -265,7 +272,7 @@
                 <div>
                     <h3>Contacter</h3>
                     <p>78 Rue Du Val<br>56800 PLOERMEL</p>
-                    <p><a href="tel:+33297930783">02 97 93 07 83</a><br><a href="tel:+33614418099">06 14 41 80 99</a></p>
+                    <p><a href="tel:+33614418099">06 14 41 80 99</a><br><a href="tel:+33297930783">02 97 93 07 83</a></p>
                 </div>
             </div>
             <div class="container">
@@ -301,5 +308,9 @@
                 <small>© JMI 56 — Installateur et dépanneur informatique à Ploërmel.</small>
             </div>
         </footer>
+
+        @if (env('GOOGLE_MAPS_KEY'))
+            <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_KEY') }}&callback=initMap" async defer></script>
+        @endif
     </body>
 </html>

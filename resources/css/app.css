@@ -424,20 +424,58 @@ textarea {
 .zone-map {
   position: relative;
   border-radius: var(--radius-lg);
-  padding: 2rem;
-  min-height: 320px;
+  padding: 0;
+  min-height: clamp(260px, 40vw, 360px);
   background: linear-gradient(140deg, #fff7e3, #ffffff 60%);
   border: 1px solid var(--line);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.zone-map svg {
+.map-canvas {
   width: 100%;
   height: 100%;
+  min-height: inherit;
 }
 
-.zone-map .pin {
-  fill: var(--accent);
+.map-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+}
+
+.map-fallback {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.map-fallback iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: none;
+  filter: saturate(0.95);
+}
+
+.map-radius {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: clamp(220px, 70%, 320px);
+  height: clamp(220px, 70%, 320px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 158, 0, 0.7);
+  background: rgba(255, 158, 0, 0.22);
+  box-shadow: 0 0 0 1px rgba(255, 158, 0, 0.15);
+}
+
+.map-shell.is-loaded .map-fallback {
+  display: none;
 }
 
 .tag-list {

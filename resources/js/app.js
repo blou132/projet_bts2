@@ -1,3 +1,57 @@
+const initMap = () => {
+    const mapElement = document.getElementById('service-map');
+    if (!mapElement || mapElement.dataset.mapInitialized === 'true') {
+        return;
+    }
+    if (!window.google || !window.google.maps) {
+        return;
+    }
+
+    const center = { lat: 47.9326, lng: -2.3979 };
+    const map = new window.google.maps.Map(mapElement, {
+        center,
+        zoom: 10,
+        disableDefaultUI: true,
+        zoomControl: true,
+        gestureHandling: 'cooperative',
+        styles: [
+            { elementType: 'geometry', stylers: [{ color: '#f7f1e6' }] },
+            { elementType: 'labels.text.stroke', stylers: [{ color: '#f7f1e6' }] },
+            { elementType: 'labels.text.fill', stylers: [{ color: '#6e6a63' }] },
+            { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#e2d2b5' }] },
+            { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#f0e2c8' }] },
+            { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e6d7bc' }] },
+            { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#d7e7f5' }] },
+            { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#b06c19' }] },
+        ],
+    });
+
+    new window.google.maps.Marker({
+        position: center,
+        map,
+        title: 'Ploërmel',
+    });
+
+    new window.google.maps.Circle({
+        strokeColor: '#ff9e00',
+        strokeOpacity: 0.6,
+        strokeWeight: 2,
+        fillColor: '#ff9e00',
+        fillOpacity: 0.2,
+        map,
+        center,
+        radius: 30000,
+    });
+
+    const mapShell = mapElement.closest('.map-shell');
+    if (mapShell) {
+        mapShell.classList.add('is-loaded');
+    }
+    mapElement.dataset.mapInitialized = 'true';
+};
+
+window.initMap = initMap;
+
 const initSiteUI = () => {
     const navToggle = document.querySelector('[data-nav-toggle]');
     const navLinks = document.querySelector('[data-nav]');
@@ -59,6 +113,10 @@ const initSiteUI = () => {
         phoneInput.addEventListener('input', handlePhoneInput);
         phoneInput.addEventListener('blur', handlePhoneInput);
         handlePhoneInput();
+    }
+
+    if (window.google && window.google.maps) {
+        initMap();
     }
 };
 
