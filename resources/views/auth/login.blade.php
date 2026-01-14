@@ -24,6 +24,7 @@
     <body>
         <a class="skip-link" href="#main">Aller au contenu</a>
 
+        <!-- Navigation simple -->
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
@@ -35,6 +36,7 @@
             </div>
         </div>
 
+        <!-- Formulaire de connexion -->
         <main id="main" class="auth-page">
             <form class="auth-card" method="post" action="{{ route('login.submit') }}">
                 @csrf

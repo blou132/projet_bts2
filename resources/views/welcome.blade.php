@@ -24,6 +24,7 @@
     <body>
         <a class="skip-link" href="#main">Aller au contenu</a>
 
+        <!-- Navigation principale -->
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="#accueil">
@@ -68,6 +69,7 @@
             </div>
         </div>
 
+        <!-- Hero -->
         <header class="hero" id="accueil">
             <div class="container hero-grid">
                 <div class="hero-copy" data-animate>
@@ -104,6 +106,7 @@
         </header>
 
         <main id="main">
+            <!-- Presentation -->
             <section class="section" id="presentation">
                 <div class="container section-grid">
                     <div data-animate>
@@ -127,6 +130,7 @@
                 </div>
             </section>
 
+            <!-- Services -->
             <section class="section section--alt" id="services">
                 <div class="container">
                     <div data-animate>
@@ -175,6 +179,7 @@
                 </div>
             </section>
 
+            <!-- Zone d'intervention -->
             <section class="section" id="zone">
                 <div class="container zone-grid">
                     <div data-animate>
@@ -210,6 +215,7 @@
                 </div>
             </section>
 
+            <!-- Partenaire -->
             <section class="section" id="partenaire">
                 <div class="container" data-animate>
                     <h2 class="section-title">Partenaire</h2>
@@ -223,6 +229,7 @@
                 </div>
             </section>
 
+            <!-- Contact -->
             <section class="section section--alt" id="contact">
                 <div class="container">
                     <div data-animate>
@@ -281,6 +288,7 @@
             </section>
         </main>
 
+        <!-- Pied de page -->
         <footer class="footer">
             <div class="container footer-grid">
                 <div>

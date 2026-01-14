@@ -4,10 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
+// Page publique
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Connexion admin
 Route::get('/login', function (Request $request) {
     if ($request->session()->get('is_admin')) {
         return redirect()->route('home');
@@ -34,6 +36,7 @@ Route::post('/login', function (Request $request) {
         ->withInput();
 })->name('login.submit');
 
+// Admin : listes par statut
 Route::get('/admin', function (Request $request) {
     if (!$request->session()->get('is_admin')) {
         return redirect()->route('login');
@@ -88,6 +91,7 @@ Route::get('/admin/termine', function (Request $request) {
     ]);
 })->name('admin.done');
 
+// Admin : recherche globale
 Route::get('/admin/recherche', function (Request $request) {
     if (!$request->session()->get('is_admin')) {
         return redirect()->route('login');
@@ -112,6 +116,7 @@ Route::get('/admin/recherche', function (Request $request) {
     ]);
 })->name('admin.search');
 
+// Formulaire de contact
 Route::post('/contact', function (Request $request) {
     $validated = $request->validate([
         'name' => ['required', 'string', 'max:120'],
@@ -132,6 +137,7 @@ Route::post('/contact', function (Request $request) {
         ->with('contact_success', 'Votre demande a bien été envoyée.');
 })->name('contact.submit');
 
+// Admin : mise a jour du statut
 Route::post('/admin/requests/{id}/status', function (Request $request, int $id) {
     if (!$request->session()->get('is_admin')) {
         return redirect()->route('login');
@@ -154,6 +160,7 @@ Route::post('/admin/requests/{id}/status', function (Request $request, int $id) 
     return redirect()->to($targetRoute . '#request-' . $id);
 })->name('admin.requests.status');
 
+// Admin : suppression
 Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
     if (!$request->session()->get('is_admin')) {
         return redirect()->route('login');
@@ -165,6 +172,7 @@ Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
         ->with('admin_status', 'Demande supprimée.');
 })->name('admin.requests.delete');
 
+// Deconnexion
 Route::post('/logout', function (Request $request) {
     $request->session()->forget('is_admin');
     $request->session()->invalidate();

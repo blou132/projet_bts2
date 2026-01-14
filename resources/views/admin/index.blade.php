@@ -24,6 +24,7 @@
     <body>
         <a class="skip-link" href="#main">Aller au contenu</a>
 
+        <!-- Navigation admin -->
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
@@ -35,6 +36,7 @@
             </div>
         </div>
 
+        <!-- Contenu admin -->
         <main id="main" class="admin-page">
             <div class="container">
                 <header class="admin-header">
@@ -50,6 +52,7 @@
                     </div>
                 </header>
 
+                <!-- Onglets + recherche -->
                 <div class="admin-toolbar">
                     <nav class="admin-tabs" aria-label="Navigation des demandes">
                         <a class="admin-tab {{ $activeStatus === 'pending' ? 'is-active' : '' }}" href="{{ route('admin') }}">Demandes</a>
@@ -70,6 +73,7 @@
                     <div class="auth-success">{{ session('admin_status') }}</div>
                 @endif
 
+                <!-- Liste des demandes -->
                 @if ($requests->isEmpty())
                     <div class="admin-empty">
                         <p>{{ $searchMode ? 'Aucune demande ne correspond à cette recherche.' : 'Aucune demande pour le moment.' }}</p>

@@ -1,3 +1,4 @@
+// Carte Google avec rayon autour de Ploermel
 const initMap = () => {
     const mapElement = document.getElementById('service-map');
     if (!mapElement || mapElement.dataset.mapInitialized === 'true') {
@@ -52,7 +53,9 @@ const initMap = () => {
 
 window.initMap = initMap;
 
+// UI generale (navigation, scroll, animations, formulaire)
 const initSiteUI = () => {
+    // Menu mobile
     const navToggle = document.querySelector('[data-nav-toggle]');
     const navLinks = document.querySelector('[data-nav]');
     const navShell = document.querySelector('.nav-shell');
@@ -71,6 +74,7 @@ const initSiteUI = () => {
         });
     }
 
+    // Effet sur la barre de navigation au scroll
     const onScroll = () => {
         if (!navShell) {
             return;
@@ -81,6 +85,7 @@ const initSiteUI = () => {
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
+    // Apparition des sections
     const animatedElements = document.querySelectorAll('[data-animate]');
     if (animatedElements.length > 0) {
         const observer = new IntersectionObserver(
@@ -98,6 +103,7 @@ const initSiteUI = () => {
         animatedElements.forEach((element) => observer.observe(element));
     }
 
+    // Formatage du telephone
     const phoneInput = document.querySelector('#phone');
     if (phoneInput) {
         const formatPhone = (value) => {
@@ -115,11 +121,13 @@ const initSiteUI = () => {
         handlePhoneInput();
     }
 
+    // Si la carte est chargee, on initialise
     if (window.google && window.google.maps) {
         initMap();
     }
 };
 
+// Lancement apres chargement du DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSiteUI);
 } else {
