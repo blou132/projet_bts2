@@ -37,10 +37,32 @@
                     <a href="#zone">Zone</a>
                     <a href="#contact">Contact</a>
                     <div class="nav-actions">
+                        @if (session('is_admin'))
+                            <div class="nav-admin">
+                                <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                                <form method="post" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                                </form>
+                            </div>
+                        @else
+                            <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
+                        @endif
                         <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                     </div>
                 </nav>
                 <div class="nav-cta">
+                    @if (session('is_admin'))
+                        <div class="nav-admin">
+                            <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                            <form method="post" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                            </form>
+                        </div>
+                    @else
+                        <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
+                    @endif
                     <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                 </div>
             </div>

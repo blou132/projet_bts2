@@ -187,6 +187,17 @@ textarea {
   width: 100%;
 }
 
+.nav-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.nav-admin form {
+  margin: 0;
+}
+
 .nav-toggle {
   display: none;
   border: 1px solid var(--line);
@@ -590,6 +601,69 @@ textarea {
   border-color: var(--accent);
 }
 
+.auth-page {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.auth-card {
+  width: min(420px, 92vw);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-card h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 2.4vw, 2.3rem);
+}
+
+.auth-lead {
+  margin: 0;
+  color: var(--muted);
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.auth-field input {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  background: #fff;
+}
+
+.auth-field input:focus {
+  outline: 2px solid rgba(255, 158, 0, 0.4);
+  border-color: var(--accent);
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.auth-error {
+  background: #fff1f1;
+  border: 1px solid #f2c4c4;
+  color: #9d2d2d;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
 .hours-grid {
   display: grid;
   gap: 0.5rem;
@@ -724,6 +798,15 @@ footer {
   }
 
   .nav-actions .btn {
+    width: 100%;
+  }
+
+  .nav-admin {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .nav-admin .btn {
     width: 100%;
   }
 
