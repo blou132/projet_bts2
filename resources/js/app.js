@@ -8,9 +8,10 @@ const initMap = () => {
         return;
     }
 
-    const center = { lat: 47.9326, lng: -2.3979 };
+    const fallbackCenter = { lat: 47.9326, lng: -2.3979 };
+    const address = mapElement.dataset.mapAddress || 'Ploërmel, France';
     const map = new window.google.maps.Map(mapElement, {
-        center,
+        center: fallbackCenter,
         zoom: 10,
         disableDefaultUI: true,
         zoomControl: true,
@@ -27,21 +28,42 @@ const initMap = () => {
         ],
     });
 
-    new window.google.maps.Marker({
-        position: center,
+    const marker = new window.google.maps.Marker({
+        position: fallbackCenter,
         map,
-        title: 'Ploërmel',
+        title: 'JMI 56 - Ploërmel',
     });
 
-    new window.google.maps.Circle({
+    const circle = new window.google.maps.Circle({
         strokeColor: '#ff9e00',
         strokeOpacity: 0.6,
         strokeWeight: 2,
         fillColor: '#ff9e00',
         fillOpacity: 0.2,
         map,
-        center,
+        center: fallbackCenter,
         radius: 30000,
+    });
+
+    const zoomToMarker = () => {
+        const position = marker.getPosition();
+        if (!position) {
+            return;
+        }
+        map.setZoom(15);
+        map.panTo(position);
+    };
+
+    marker.addListener('click', zoomToMarker);
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            marker.setPosition(location);
+            circle.setCenter(location);
+            map.setCenter(location);
+        }
     });
 
     const mapShell = mapElement.closest('.map-shell');

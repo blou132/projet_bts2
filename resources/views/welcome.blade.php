@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Installateur et dépanneur informatique à Ploërmel | JMI 56</title>
+        <title>JMI 56 - Projet BTS</title>
         <meta name="description" content="Spécialisée des services informatiques, JMI 56 intervient à domicile pour l'installation et le dépannage d'équipements informatiques et logiciels à Ploërmel.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,7 +197,7 @@
                     </div>
                     <div class="zone-map" data-animate>
                         <div class="map-shell">
-                            <div id="service-map" class="map-canvas" role="region" aria-label="Carte de la zone d'intervention autour de Ploërmel"></div>
+                            <div id="service-map" class="map-canvas" data-map-address="78 Rue du Val, 56800 Ploërmel, France" role="region" aria-label="Carte de la zone d'intervention autour de Ploërmel"></div>
                             <div class="map-fallback" aria-hidden="true">
                                 <iframe
                                     title="Carte Google Maps de Ploërmel"

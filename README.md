@@ -1,4 +1,6 @@
-# JMI 56 - Site vitrine
+# JMI 56 - Projet BTS
+
+<p align="center"><img src="public/images/logo-jmi56.png" width="180" alt="JMI 56"></p>
 
 Site moderne et responsive pour un reparateur informatique (Ploermel). Le formulaire de contact alimente un espace admin pour suivre les demandes.
 
