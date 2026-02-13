@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 const GDPR_RETENTION_DAYS = 365;
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'admin123';
 
 function purgeOldContactRequests(): void
 {
@@ -31,16 +33,16 @@ Route::get('/login', function (Request $request) {
 
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
-        'email' => ['required', 'email'],
+        'username' => ['required', 'string'],
         'password' => ['required', 'string'],
     ]);
 
-    $user = User::where('email', $credentials['email'])->first();
-
-    if ($user && Hash::check($credentials['password'], $user->password)) {
+    $adminUsername = (string) env('ADMIN_USERNAME', ADMIN_USERNAME);
+    $adminPassword = (string) env('ADMIN_PASSWORD', ADMIN_PASSWORD);
+    if ($credentials['username'] === $adminUsername && $credentials['password'] === $adminPassword) {
         $request->session()->regenerate();
         $request->session()->put('is_admin', true);
-        $request->session()->put('admin_user_id', $user->id);
+        $request->session()->forget('admin_user_id');
 
         return redirect()->route('home');
     }
@@ -65,17 +67,14 @@ Route::post('/register', function (Request $request) {
         'password' => ['required', 'string', 'min:8', 'confirmed'],
     ]);
 
-    $user = User::create([
+    User::create([
         'name' => trim($validated['name']),
         'email' => trim($validated['email']),
         'password' => Hash::make($validated['password']),
     ]);
 
-    $request->session()->regenerate();
-    $request->session()->put('is_admin', true);
-    $request->session()->put('admin_user_id', $user->id);
-
-    return redirect()->route('home');
+    return redirect()->route('login')
+        ->with('auth_success', 'Compte créé. Seul le compte admin peut accéder à l’administration.');
 })->name('register.submit');
 
 // Admin : listes par statut

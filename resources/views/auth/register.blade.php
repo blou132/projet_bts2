@@ -39,7 +39,7 @@
             <form class="auth-card" method="post" action="{{ route('register.submit') }}">
                 @csrf
                 <h1>Créer un compte</h1>
-                <p class="auth-lead">Créez un accès à l'administration.</p>
+                <p class="auth-lead">Créez un compte utilisateur (sans accès admin).</p>
 
                 @if ($errors->any())
                     <div class="auth-error">{{ $errors->first() }}</div>

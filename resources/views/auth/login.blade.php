@@ -43,13 +43,17 @@
                 <h1>Se connecter</h1>
                 <p class="auth-lead">Accès réservé à l'administration.</p>
 
+                @if (session('auth_success'))
+                    <div class="auth-success">{{ session('auth_success') }}</div>
+                @endif
+
                 @if ($errors->any())
                     <div class="auth-error">{{ $errors->first() }}</div>
                 @endif
 
                 <div class="auth-field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" autocomplete="username" required value="{{ old('email') }}">
+                    <label for="username">Identifiant admin</label>
+                    <input id="username" name="username" type="text" autocomplete="username" required value="{{ old('username') }}">
                 </div>
                 <div class="auth-field">
                     <label for="password">Mot de passe</label>
