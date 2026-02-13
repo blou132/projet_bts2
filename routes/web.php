@@ -22,9 +22,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Connexion admin
+// Connexion
 Route::get('/login', function (Request $request) {
-    if ($request->session()->get('is_admin')) {
+    if ($request->session()->get('is_admin') || $request->session()->get('user_id')) {
         return redirect()->route('home');
     }
 
@@ -33,16 +33,26 @@ Route::get('/login', function (Request $request) {
 
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
-        'username' => ['required', 'string'],
+        'login' => ['required', 'string'],
         'password' => ['required', 'string'],
     ]);
 
     $adminUsername = (string) env('ADMIN_USERNAME', ADMIN_USERNAME);
     $adminPassword = (string) env('ADMIN_PASSWORD', ADMIN_PASSWORD);
-    if ($credentials['username'] === $adminUsername && $credentials['password'] === $adminPassword) {
+    if ($credentials['login'] === $adminUsername && $credentials['password'] === $adminPassword) {
         $request->session()->regenerate();
         $request->session()->put('is_admin', true);
-        $request->session()->forget('admin_user_id');
+        $request->session()->forget(['user_id', 'user_name']);
+
+        return redirect()->route('home');
+    }
+
+    $user = User::where('email', $credentials['login'])->first();
+    if ($user && Hash::check($credentials['password'], $user->password)) {
+        $request->session()->regenerate();
+        $request->session()->put('is_admin', false);
+        $request->session()->put('user_id', $user->id);
+        $request->session()->put('user_name', $user->name);
 
         return redirect()->route('home');
     }
@@ -53,7 +63,7 @@ Route::post('/login', function (Request $request) {
 })->name('login.submit');
 
 Route::get('/register', function (Request $request) {
-    if ($request->session()->get('is_admin')) {
+    if ($request->session()->get('is_admin') || $request->session()->get('user_id')) {
         return redirect()->route('home');
     }
 
@@ -229,7 +239,7 @@ Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
 
 // Deconnexion
 Route::post('/logout', function (Request $request) {
-    $request->session()->forget(['is_admin', 'admin_user_id']);
+    $request->session()->forget(['is_admin', 'admin_user_id', 'user_id', 'user_name']);
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 

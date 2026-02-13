@@ -41,7 +41,7 @@
             <form class="auth-card" method="post" action="{{ route('login.submit') }}">
                 @csrf
                 <h1>Se connecter</h1>
-                <p class="auth-lead">Accès réservé à l'administration.</p>
+                <p class="auth-lead">Utilisateur : email + mot de passe. Admin : identifiant unique + mot de passe.</p>
 
                 @if (session('auth_success'))
                     <div class="auth-success">{{ session('auth_success') }}</div>
@@ -52,8 +52,8 @@
                 @endif
 
                 <div class="auth-field">
-                    <label for="username">Identifiant admin</label>
-                    <input id="username" name="username" type="text" autocomplete="username" required value="{{ old('username') }}">
+                    <label for="login">Email utilisateur ou identifiant admin</label>
+                    <input id="login" name="login" type="text" autocomplete="username" required value="{{ old('login') }}">
                 </div>
                 <div class="auth-field">
                     <label for="password">Mot de passe</label>

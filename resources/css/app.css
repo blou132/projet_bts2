@@ -203,6 +203,18 @@ textarea {
   margin: 0;
 }
 
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 .nav-toggle {
   display: none;
   border: 1px solid var(--line);
@@ -1056,6 +1068,11 @@ footer {
 
   .nav-admin .btn {
     width: 100%;
+  }
+
+  .nav-admin .nav-user {
+    width: 100%;
+    justify-content: center;
   }
 
   .nav-toggle {

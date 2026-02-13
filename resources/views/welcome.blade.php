@@ -46,6 +46,15 @@
                                     <button class="btn btn-ghost" type="submit">Se déconnecter</button>
                                 </form>
                             </div>
+                        @elseif (session('user_id'))
+                            <div class="nav-admin">
+                                <span class="nav-user">Connecté : {{ session('user_name') }}</span>
+                                <form method="post" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                                </form>
+                            </div>
+                            <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                         @else
                             <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
                             <a class="btn btn-primary" href="#contact">Devis gratuit</a>
@@ -61,6 +70,15 @@
                                 <button class="btn btn-ghost" type="submit">Se déconnecter</button>
                             </form>
                         </div>
+                    @elseif (session('user_id'))
+                        <div class="nav-admin">
+                            <span class="nav-user">Connecté : {{ session('user_name') }}</span>
+                            <form method="post" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                            </form>
+                        </div>
+                        <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                     @else
                         <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
                         <a class="btn btn-primary" href="#contact">Devis gratuit</a>
