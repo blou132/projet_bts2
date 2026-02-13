@@ -55,7 +55,7 @@
                 <!-- Onglets + recherche -->
                 <div class="admin-toolbar">
                     <nav class="admin-tabs" aria-label="Navigation des demandes">
-                        <a class="admin-tab {{ $activeStatus === 'pending' ? 'is-active' : '' }}" href="{{ route('admin') }}">Demandes</a>
+                        <a class="admin-tab {{ $activeStatus === 'pending' ? 'is-active' : '' }}" href="{{ route('admin') }}">En attente</a>
                         <a class="admin-tab {{ $activeStatus === 'in_progress' ? 'is-active' : '' }}" href="{{ route('admin.in_progress') }}">En cours</a>
                         <a class="admin-tab {{ $activeStatus === 'done' ? 'is-active' : '' }}" href="{{ route('admin.done') }}">Terminé</a>
                     </nav>
@@ -98,7 +98,7 @@
                                     <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
                                         @csrf
                                         <input type="hidden" name="status" value="pending">
-                                        <button class="status-btn status-btn--pending {{ $request->status === 'pending' ? 'is-active' : '' }}" type="submit">Non démarré</button>
+                                        <button class="status-btn status-btn--pending {{ $request->status === 'pending' ? 'is-active' : '' }}" type="submit">En attente</button>
                                     </form>
                                     <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
                                         @csrf
