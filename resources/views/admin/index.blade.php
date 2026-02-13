@@ -95,21 +95,27 @@
                                 </div>
                                 <p class="admin-message">{{ $request->message }}</p>
                                 <div class="admin-status">
-                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
-                                        @csrf
-                                        <input type="hidden" name="status" value="pending">
-                                        <button class="status-btn status-btn--pending {{ $request->status === 'pending' ? 'is-active' : '' }}" type="submit">En attente</button>
-                                    </form>
-                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
-                                        @csrf
-                                        <input type="hidden" name="status" value="in_progress">
-                                        <button class="status-btn status-btn--progress {{ $request->status === 'in_progress' ? 'is-active' : '' }}" type="submit">En cours</button>
-                                    </form>
-                                    <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
-                                        @csrf
-                                        <input type="hidden" name="status" value="done">
-                                        <button class="status-btn status-btn--done {{ $request->status === 'done' ? 'is-active' : '' }}" type="submit">Terminé</button>
-                                    </form>
+                                    @if ($request->status !== 'pending')
+                                        <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                            @csrf
+                                            <input type="hidden" name="status" value="pending">
+                                            <button class="status-btn status-btn--pending" type="submit">En attente</button>
+                                        </form>
+                                    @endif
+                                    @if ($request->status !== 'in_progress')
+                                        <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                            @csrf
+                                            <input type="hidden" name="status" value="in_progress">
+                                            <button class="status-btn status-btn--progress" type="submit">En cours</button>
+                                        </form>
+                                    @endif
+                                    @if ($request->status !== 'done')
+                                        <form method="post" action="{{ route('admin.requests.status', $request->id) }}">
+                                            @csrf
+                                            <input type="hidden" name="status" value="done">
+                                            <button class="status-btn status-btn--done" type="submit">Terminé</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </article>
                         @endforeach
