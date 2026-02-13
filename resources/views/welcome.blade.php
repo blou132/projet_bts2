@@ -48,8 +48,8 @@
                             </div>
                         @else
                             <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
+                            <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                         @endif
-                        <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                     </div>
                 </nav>
                 <div class="nav-cta">
@@ -63,8 +63,8 @@
                         </div>
                     @else
                         <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
+                        <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                     @endif
-                    <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                 </div>
             </div>
         </div>
