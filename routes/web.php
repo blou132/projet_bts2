@@ -141,10 +141,16 @@ Route::post('/contact', function (Request $request) {
         'message' => ['required', 'string', 'max:2000'],
     ]);
 
+    $sanitized = [
+        'name' => trim(strip_tags($validated['name'])),
+        'phone' => trim(strip_tags($validated['phone'])),
+        'message' => trim(strip_tags($validated['message'])),
+    ];
+
     DB::table('contact_requests')->insert([
-        'name' => $validated['name'],
-        'phone' => $validated['phone'],
-        'message' => $validated['message'],
+        'name' => $sanitized['name'],
+        'phone' => $sanitized['phone'],
+        'message' => $sanitized['message'],
         'status' => 'pending',
         'created_at' => now(),
         'updated_at' => now(),
