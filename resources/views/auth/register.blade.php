@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Se connecter | JMI 56</title>
-        <meta name="description" content="Connexion à l'espace administrateur JMI 56.">
+        <title>Créer un compte | JMI 56</title>
+        <meta name="description" content="Création de compte pour l'espace administrateur JMI 56.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,6 @@
     <body>
         <a class="skip-link" href="#main">Aller au contenu</a>
 
-        <!-- Navigation simple -->
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
@@ -36,29 +35,35 @@
             </div>
         </div>
 
-        <!-- Formulaire de connexion -->
         <main id="main" class="auth-page">
-            <form class="auth-card" method="post" action="{{ route('login.submit') }}">
+            <form class="auth-card" method="post" action="{{ route('register.submit') }}">
                 @csrf
-                <h1>Se connecter</h1>
-                <p class="auth-lead">Accès réservé à l'administration.</p>
+                <h1>Créer un compte</h1>
+                <p class="auth-lead">Créez un accès à l'administration.</p>
 
                 @if ($errors->any())
                     <div class="auth-error">{{ $errors->first() }}</div>
                 @endif
 
                 <div class="auth-field">
+                    <label for="name">Nom d'utilisateur</label>
+                    <input id="name" name="name" type="text" autocomplete="name" required value="{{ old('name') }}">
+                </div>
+                <div class="auth-field">
                     <label for="email">Email</label>
-                    <input id="email" name="email" type="email" autocomplete="username" required value="{{ old('email') }}">
+                    <input id="email" name="email" type="email" autocomplete="email" required value="{{ old('email') }}">
                 </div>
                 <div class="auth-field">
                     <label for="password">Mot de passe</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required>
+                </div>
+                <div class="auth-field">
+                    <label for="password_confirmation">Confirmer le mot de passe</label>
+                    <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required>
                 </div>
                 <div class="auth-actions">
-                    <button class="btn btn-primary" type="submit">Connexion</button>
-                    <a class="btn btn-ghost" href="{{ route('register') }}">Créer un compte</a>
-                    <a class="btn btn-ghost" href="{{ route('home') }}">Retour</a>
+                    <button class="btn btn-primary" type="submit">Créer le compte</button>
+                    <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
                 </div>
             </form>
         </main>

@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 const GDPR_RETENTION_DAYS = 365;
@@ -29,13 +31,16 @@ Route::get('/login', function (Request $request) {
 
 Route::post('/login', function (Request $request) {
     $credentials = $request->validate([
-        'username' => ['required', 'string'],
+        'email' => ['required', 'email'],
         'password' => ['required', 'string'],
     ]);
 
-    if ($credentials['username'] === 'admin' && $credentials['password'] === 'admin123') {
+    $user = User::where('email', $credentials['email'])->first();
+
+    if ($user && Hash::check($credentials['password'], $user->password)) {
         $request->session()->regenerate();
         $request->session()->put('is_admin', true);
+        $request->session()->put('admin_user_id', $user->id);
 
         return redirect()->route('home');
     }
@@ -44,6 +49,34 @@ Route::post('/login', function (Request $request) {
         ->withErrors(['login' => 'Identifiant ou mot de passe incorrect.'])
         ->withInput();
 })->name('login.submit');
+
+Route::get('/register', function (Request $request) {
+    if ($request->session()->get('is_admin')) {
+        return redirect()->route('home');
+    }
+
+    return view('auth.register');
+})->name('register');
+
+Route::post('/register', function (Request $request) {
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:120'],
+        'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    $user = User::create([
+        'name' => trim($validated['name']),
+        'email' => trim($validated['email']),
+        'password' => Hash::make($validated['password']),
+    ]);
+
+    $request->session()->regenerate();
+    $request->session()->put('is_admin', true);
+    $request->session()->put('admin_user_id', $user->id);
+
+    return redirect()->route('home');
+})->name('register.submit');
 
 // Admin : listes par statut
 Route::get('/admin', function (Request $request) {
@@ -197,7 +230,7 @@ Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
 
 // Deconnexion
 Route::post('/logout', function (Request $request) {
-    $request->session()->forget('is_admin');
+    $request->session()->forget(['is_admin', 'admin_user_id']);
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
