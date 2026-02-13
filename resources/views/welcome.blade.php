@@ -286,6 +286,28 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Mentions legales -->
+            <section class="section" id="mentions-legales">
+                <div class="container" data-animate>
+                    <h2 class="section-title">Mentions légales</h2>
+                    <div class="legal-grid">
+                        <article class="card legal-card">
+                            <h3>Éditeur du site</h3>
+                            <p>JMI 56<br>78 Rue Du Val<br>56800 PLOERMEL</p>
+                            <p>Téléphone : <a href="tel:+33614418099">06 14 41 80 99</a> — <a href="tel:+33297930783">02 97 93 07 83</a></p>
+                        </article>
+                        <article class="card legal-card">
+                            <h3>Hébergement</h3>
+                            <p>À compléter (nom de l’hébergeur, adresse, téléphone).</p>
+                        </article>
+                        <article class="card legal-card">
+                            <h3>Données personnelles</h3>
+                            <p>Les informations envoyées via le formulaire sont utilisées uniquement pour répondre aux demandes. Elles sont conservées pendant 12 mois maximum puis supprimées conformément au RGPD.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Pied de page -->
@@ -304,6 +326,7 @@
                         <a class="tag" href="#presentation">Présentation</a>
                         <a class="tag" href="#services">Services</a>
                         <a class="tag" href="#contact">Contact</a>
+                        <a class="tag" href="#mentions-legales">Mentions légales</a>
                     </div>
                 </div>
                 <div>

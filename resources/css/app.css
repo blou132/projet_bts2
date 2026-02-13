@@ -583,6 +583,23 @@ textarea {
   border-color: var(--accent);
 }
 
+/* Mentions legales */
+.legal-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.legal-card h3 {
+  margin-top: 0;
+}
+
+.legal-card p {
+  margin: 0.45rem 0 0;
+  color: var(--ink-soft);
+}
+
 /* Pages connexion/admin */
 .auth-page {
   min-height: calc(100vh - 120px);
