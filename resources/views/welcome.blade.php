@@ -281,7 +281,7 @@
                                 <textarea id="message" name="message" placeholder="Expliquez votre besoin" required>{{ old('message') }}</textarea>
                                 <label for="message">Message</label>
                             </div>
-                            <button class="btn btn-primary" type="submit">Envoyer la demande</button>
+                            <button class="btn btn-primary contact-submit" type="submit">Envoyer la demande</button>
                         </form>
                     </div>
                 </div>
