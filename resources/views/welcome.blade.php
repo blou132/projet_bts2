@@ -223,7 +223,7 @@
                             <h3>JK informatique</h3>
                             <p>Partenaire local pour des solutions informatiques complémentaires.</p>
                         </div>
-                        <a class="btn btn-outline" href="https://www.jk-informatique.fr" target="_blank" rel="noopener">JK informatique</a>
+                        <a class="btn btn-outline" href="https://www.jkinformatique.com/" target="_blank" rel="noopener">JK informatique</a>
                     </div>
                 </div>
             </section>
