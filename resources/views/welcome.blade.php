@@ -79,7 +79,6 @@
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="sms:+33614418099">06 14 41 80 99</a>
                         <a class="btn btn-outline" href="tel:+33297930783">02 97 93 07 83</a>
-                        <a class="btn btn-ghost" href="#contact">Contact</a>
                     </div>
                     <div class="hero-meta">
                         <div class="meta-card">
