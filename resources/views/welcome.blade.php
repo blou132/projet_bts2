@@ -269,17 +269,17 @@
                             @if ($errors->any())
                                 <div class="auth-error">{{ $errors->first() }}</div>
                             @endif
-                            <div>
-                                <label for="name">Nom</label>
+                            <div class="contact-field">
                                 <input id="name" name="name" type="text" placeholder="Votre nom" value="{{ old('name') }}" required>
+                                <label for="name">Nom</label>
                             </div>
-                            <div>
-                                <label for="phone">Téléphone</label>
+                            <div class="contact-field">
                                 <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" minlength="14" maxlength="14" pattern="[0-9]{2}( [0-9]{2}){4}" placeholder="06 12 34 56 78" value="{{ old('phone') }}" required>
+                                <label for="phone">Téléphone</label>
                             </div>
-                            <div>
-                                <label for="message">Message</label>
+                            <div class="contact-field">
                                 <textarea id="message" name="message" placeholder="Expliquez votre besoin" required>{{ old('message') }}</textarea>
+                                <label for="message">Message</label>
                             </div>
                             <button class="btn btn-primary" type="submit">Envoyer la demande</button>
                         </form>

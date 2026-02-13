@@ -559,9 +559,15 @@ textarea {
   gap: 1rem;
 }
 
+.contact-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
 .contact-form label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
+  color: var(--muted);
 }
 
 .contact-form input,
