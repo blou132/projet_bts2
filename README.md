@@ -1,88 +1,128 @@
-# JMI 56 - Projet BTS
+# JMI 56 - Projet BTS SIO
 
 <p align="center"><img src="public/images/logo-jmi56.png" width="180" alt="JMI 56"></p>
 
-Site vitrine responsive pour un reparateur informatique (Ploermel), avec formulaire de contact et espace d'administration des demandes.
+Projet web realise dans le cadre du BTS SIO.
+Le site presente l'activite d'un reparateur informatique local (JMI 56) et integre un back-office pour traiter les demandes clients.
 
-## Objectif du projet
-- Proposer une page publique claire (presentation, services, zone d'intervention, contact).
-- Permettre le suivi des demandes clients dans une interface admin.
-- Appliquer des bases de securite web et de conformite RGPD.
+## 1) Contexte et objectif
+Objectifs du projet:
+- proposer un site vitrine moderne, responsive et lisible;
+- permettre l'envoi de demandes via un formulaire;
+- permettre un suivi admin des demandes (statuts, recherche, suppression);
+- appliquer des bases de securite web et de conformite RGPD;
+- produire une documentation technique exploitable pour la maintenance.
 
-## Fonctionnalites principales
-- Page publique:
-  - Hero + sections presentation/services/zone/contact/partenaire/mentions legales.
-  - Carte Google Maps (fallback iframe si cle absente).
-  - Formulaire de demande (nom, telephone, message).
-- Espace admin:
-  - Liste des demandes par statut: `En attente`, `En cours`, `Termine`.
-  - Recherche par nom ou telephone.
-  - Changement de statut.
-  - Suppression d'une demande.
-  - Couleurs de statut plus visibles.
-  - Le bouton du statut courant est masque (on ne peut changer que vers les autres statuts).
+## 2) Fonctionnalites realisees
+### Site public
+- sections: accueil, presentation, services, zone, partenaire, contact, mentions legales;
+- formulaire de demande: nom, telephone, message;
+- carte Google Maps avec fallback iframe;
+- adaptation mobile/desktop.
 
-## Authentification
-- Route de connexion: `/login`
-- Route de creation de compte utilisateur: `/register`
-- Connexion utilisateur classique:
-  - `login` = email utilisateur
-  - `password` = mot de passe du compte
-- Connexion admin:
-  - `login` = identifiant admin unique
-  - `password` = mot de passe admin
-- Seul l'admin a acces aux routes `/admin*`.
+### Back-office admin
+- affichage des demandes par statut: `En attente`, `En cours`, `Termine`;
+- changement de statut;
+- recherche par nom ou telephone;
+- suppression d'une demande;
+- code couleur des statuts renforce;
+- masquage du bouton du statut deja actif.
 
-### Identifiants admin
-- Par defaut:
-  - identifiant: `admin`
-  - mot de passe: `admin123`
-- Recommande en production via `.env`:
+### Comptes et connexion
+- route de connexion: `/login`;
+- route de creation de compte utilisateur: `/register`;
+- un utilisateur standard peut se connecter normalement (email + mot de passe);
+- l'admin dispose d'un identifiant unique et d'un mot de passe dedie;
+- seules les sessions admin peuvent acceder aux routes `/admin*`.
+
+## 3) Securite et RGPD
+- validation serveur Laravel sur les formulaires (`$request->validate(...)`);
+- nettoyage des champs texte du formulaire contact (`trim`, `strip_tags`);
+- regeneration de session a la connexion;
+- protection CSRF via Blade (`@csrf`);
+- purge automatique des demandes anciennes selon `GDPR_RETENTION_DAYS`.
+
+## 4) Stack technique
+- Laravel 12;
+- PHP 8.3;
+- MySQL (tables `users`, `contact_requests`, `sessions`);
+- Vite (build front);
+- CSS personnalise.
+
+## 5) Fichiers importants du projet
+- `routes/web.php`: logique metier principale (auth, admin, contact, RGPD);
+- `resources/views/welcome.blade.php`: interface publique;
+- `resources/views/admin/index.blade.php`: interface admin;
+- `resources/views/auth/login.blade.php`: connexion;
+- `resources/views/auth/register.blade.php`: creation de compte utilisateur;
+- `resources/css/app.css`: styles globaux;
+- `docs/Documentation-PHPDoc.md`: documentation technique (DocBlock + Doxygen);
+- `Doxyfile`: configuration Doxygen.
+
+## 6) Installation et lancement
+1. Cloner le projet.
+2. Installer les dependances PHP:
+   - `composer install`
+   - si besoin local: `./composer install`
+3. Copier l'environnement:
+   - `cp .env.example .env`
+4. Configurer la base MySQL dans `.env`.
+5. Generer la cle:
+   - `php artisan key:generate`
+6. Migrer la base:
+   - `php artisan migrate`
+7. Lancer le serveur:
+   - `php artisan serve`
+
+Assets front (optionnel):
+- `npm install`
+- `npm run dev` (developpement)
+- `npm run build` (production)
+
+## 7) Configuration utile (.env)
+- admin:
   - `ADMIN_USERNAME=...`
   - `ADMIN_PASSWORD=...`
+- carte:
+  - `GOOGLE_MAPS_KEY=...` (optionnel)
 
-## Securite et conformite
-- Validation serveur sur les formulaires (Laravel `validate`).
-- Nettoyage des champs texte du contact (`trim`, `strip_tags`) pour limiter les injections.
-- Purge RGPD automatique des demandes anciennes:
-  - constante `GDPR_RETENTION_DAYS` dans `routes/web.php`
-  - suppression des demandes depassant la duree de conservation.
+Valeurs par defaut admin si variables absentes:
+- identifiant: `admin`
+- mot de passe: `admin123`
 
-## Stack technique
-- Laravel 12
-- PHP 8.3
-- MySQL (sessions + demandes + utilisateurs)
-- Vite
-- CSS personnalise
+## 8) Scenario de demonstration (jury)
+1. Ouvrir la page d'accueil et presenter les sections publiques.
+2. Soumettre une demande via le formulaire contact.
+3. Creer un compte utilisateur (`/register`) et montrer la connexion standard.
+4. Montrer qu'un utilisateur standard n'a pas acces a `/admin`.
+5. Se connecter en admin (`/login`) avec l'identifiant admin.
+6. Montrer:
+   - tri par statut;
+   - passage `En attente` -> `En cours` -> `Termine`;
+   - recherche;
+   - suppression;
+   - impact visuel des statuts.
 
-## Installation rapide
-1. Installer les dependances PHP: `composer install`
-2. Copier l'environnement: `cp .env.example .env`
-3. Configurer MySQL dans `.env`
-4. Generer la cle Laravel: `php artisan key:generate`
-5. Migrer la base: `php artisan migrate`
-6. Lancer le serveur: `php artisan serve`
+## 9) Tests et verification
+Commandes executees:
+- `php -l routes/web.php`
+- `php artisan route:list`
+- `php artisan test`
+- `./composer test`
 
-## Assets front
-- Installer les dependances front: `npm install`
-- Dev: `npm run dev`
-- Build: `npm run build`
+Resultat:
+- tests unitaires et feature OK (2 passes).
 
-## Carte Google Maps
-- Ajouter la cle API dans `.env`:
-  - `GOOGLE_MAPS_KEY=...`
-- Si la cle est absente, la carte fallback iframe est affichee.
+## 10) Documentation technique
+- documentation projet: `docs/Documentation-PHPDoc.md`
+- generation Doxygen:
+  - installation: `sudo apt-get install doxygen graphviz`
+  - generation: `doxygen Doxyfile`
+  - sortie: `docs/doxygen/html/index.html`
 
-## Documentation projet
-- Documentation PHPDoc/DocBlock:
-  - `docs/Documentation-PHPDoc.md`
-- Generation automatique de documentation (optionnel):
-  - `phpdoc -d app,routes -t docs/api --ignore "vendor/,storage/,bootstrap/cache/,tests/"`
-
-## Notes pour l'evaluation
-- Le projet montre:
-  - integration front + back Laravel
-  - gestion de statut metier
-  - authentification differenciee user/admin
-  - prise en compte RGPD et securite de base
-  - documentation technique exploitable (DocBlock/PHPDoc)
+## 11) Points d'evaluation BTS couverts
+- analyse du besoin et formalisation des fonctionnalites;
+- conception et implementation d'un service web complet;
+- gestion des acces (utilisateur vs admin);
+- prise en compte securite et RGPD;
+- qualite logicielle: tests de base + documentation technique.
