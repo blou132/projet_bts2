@@ -56,6 +56,7 @@ Objectifs du projet:
 - `resources/views/auth/login.blade.php`: connexion;
 - `resources/views/auth/register.blade.php`: creation de compte utilisateur;
 - `resources/css/app.css`: styles globaux;
+- `tests/Feature/WebRoutesTest.php`: tests fonctionnels des routes principales;
 - `docs/Documentation-PHPDoc.md`: documentation technique (DocBlock + Doxygen);
 - `Doxyfile`: configuration Doxygen.
 
@@ -104,14 +105,28 @@ Valeurs par defaut admin si variables absentes:
    - impact visuel des statuts.
 
 ## 9) Tests et verification
-Commandes executees:
-- `php -l routes/web.php`
-- `php artisan route:list`
+Suite de tests mise en place:
+- tests unitaires de base;
+- tests feature Laravel;
+- tests fonctionnels complets sur les routes metier:
+  - accueil, register, login user/admin, logout;
+  - formulaire contact (validation + sanitation);
+  - protections admin;
+  - recherche admin, changement de statut, suppression;
+  - purge RGPD.
+
+Commandes pour lancer les tests:
 - `php artisan test`
 - `./composer test`
+- `php artisan test tests/Feature/WebRoutesTest.php`
+- `php artisan test --filter=test_admin_can_login_with_unique_credentials`
 
-Resultat:
-- tests unitaires et feature OK (2 passes).
+Verification complementaire:
+- `php -l routes/web.php`
+- `php artisan route:list`
+
+Resultat de la derniere execution:
+- `21 passed (77 assertions)`
 
 ## 10) Documentation technique
 - documentation projet: `docs/Documentation-PHPDoc.md`

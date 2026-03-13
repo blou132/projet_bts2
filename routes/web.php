@@ -6,20 +6,30 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
-const GDPR_RETENTION_DAYS = 365;
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin123';
+if (!defined('GDPR_RETENTION_DAYS')) {
+    define('GDPR_RETENTION_DAYS', 365);
+}
+
+if (!defined('ADMIN_USERNAME')) {
+    define('ADMIN_USERNAME', 'admin');
+}
+
+if (!defined('ADMIN_PASSWORD')) {
+    define('ADMIN_PASSWORD', 'admin123');
+}
 
 /**
  * Supprime les demandes de contact depassant la duree de conservation RGPD.
  *
  * @return void
  */
-function purgeOldContactRequests(): void
-{
-    DB::table('contact_requests')
-        ->where('created_at', '<', now()->subDays(GDPR_RETENTION_DAYS))
-        ->delete();
+if (!function_exists('purgeOldContactRequests')) {
+    function purgeOldContactRequests(): void
+    {
+        DB::table('contact_requests')
+            ->where('created_at', '<', now()->subDays(GDPR_RETENTION_DAYS))
+            ->delete();
+    }
 }
 
 // Page publique
