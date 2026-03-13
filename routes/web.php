@@ -10,6 +10,11 @@ const GDPR_RETENTION_DAYS = 365;
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'admin123';
 
+/**
+ * Supprime les demandes de contact depassant la duree de conservation RGPD.
+ *
+ * @return void
+ */
 function purgeOldContactRequests(): void
 {
     DB::table('contact_requests')
