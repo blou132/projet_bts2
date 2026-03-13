@@ -1,96 +1,37 @@
-# Documentation PHP / DocBlock - Projet JMI 56
+# Documentation du projet JMI 56 avec Doxygen
 
-## 1) Objectif
-Cette documentation suit les principes vus dans:
-- `2.1C6-DocumentationPHP.pdf`
-- `2.1C6-DocBlock.pdf`
+## 1. Objectif
+Cette documentation explique comment documenter le code PHP du projet avec des DocBlocks et generer une documentation HTML avec Doxygen.
 
-Le but est de:
-- documenter le code PHP avec des DocBlocks standards;
-- faciliter la maintenance;
-- préparer une génération automatique avec PHPDocumentor.
+## 2. Principe des DocBlocks
+Les DocBlocks sont des commentaires structures places au-dessus des classes, proprietes et methodes.
 
-## 2) Rappels DocBlock (synthèse)
-Un DocBlock est un commentaire spécial écrit au format:
+Format de base:
 
 ```php
 /**
- * Résumé court.
+ * Resume court.
  *
- * Description optionnelle.
- * @param type $nom Description
+ * Description detaillee (optionnelle).
+ * @param type $param Description
  * @return type Description
  */
 ```
 
-Balises principales:
-- `@param`: décrit un paramètre de fonction/méthode.
-- `@return`: décrit la valeur de retour.
-- `@var`: décrit une propriété/variable.
-- `@throws`: décrit une exception possible.
-- `@package`: groupe logique de classes/fichiers.
-- `@see`: référence vers un autre élément.
-- `@deprecated`: indique qu'un élément est obsolète.
+Balises importantes:
+- `@param`
+- `@return`
+- `@var`
+- `@throws`
+- `@see`
+- `@deprecated`
 
-## 3) Installation de PHPDocumentor
-Option Composer:
-
-```bash
-composer require --dev phpdocumentor/phpdocumentor
-```
-
-Option PHAR (Linux):
-
-```bash
-sudo apt install php-pear graphviz
-wget https://phpdoc.org/phpDocumentor.phar
-sudo mv phpDocumentor.phar /usr/local/bin/phpdoc
-sudo chown root:root /usr/local/bin/phpdoc
-sudo chmod +x /usr/local/bin/phpdoc
-```
-
-## 4) Génération de la documentation
-Depuis la racine du projet:
-
-```bash
-mkdir -p docs/api
-phpdoc -d app,routes -t docs/api --ignore "vendor/,storage/,bootstrap/cache/,tests/"
-```
-
-Explication:
-- `-d`: répertoires sources à documenter.
-- `-t`: dossier de sortie.
-- `--ignore`: éléments exclus de la génération.
-
-## 5) Périmètre documenté du projet
-Le projet contient principalement:
-- des routes Laravel dans `routes/web.php`;
-- des vues Blade dans `resources/views`;
-- des migrations dans `database/migrations`;
-- des styles dans `resources/css/app.css`.
-
-## 6) Fonctionnement métier (résumé)
-### 6.1 Authentification
-- Connexion admin: identifiant/mot de passe admin uniques (`ADMIN_USERNAME` / `ADMIN_PASSWORD`, via `.env` ou valeurs par défaut).
-- Connexion utilisateur: email + mot de passe (table `users`).
-- Seul l'admin accède aux routes `/admin*`.
-
-### 6.2 Gestion des demandes client
-- Une demande est créée via le formulaire de contact (`name`, `phone`, `message`).
-- Statuts possibles: `pending`, `in_progress`, `done`.
-- L'admin peut filtrer par statut, rechercher, modifier le statut et supprimer.
-
-### 6.3 Sécurité et conformité
-- Validation Laravel sur tous les formulaires sensibles.
-- Nettoyage des champs texte du formulaire de contact (`strip_tags`, `trim`).
-- Purge RGPD automatique des demandes anciennes (constante `GDPR_RETENTION_DAYS`).
-
-## 7) Exemple de DocBlock adapté au projet
-Exemple pour la fonction de purge RGPD dans `routes/web.php`:
+## 3. Exemple adapte au projet
+Exemple reel dans `routes/web.php`:
 
 ```php
 /**
- * Supprime les demandes de contact dépassant la durée de conservation RGPD.
+ * Supprime les demandes de contact depassant la duree de conservation RGPD.
  *
  * @return void
  */
@@ -102,35 +43,42 @@ function purgeOldContactRequests(): void
 }
 ```
 
-Exemple pour une méthode de service (si ajout futur):
+## 4. Installation de Doxygen
+Sous Linux:
 
-```php
-/**
- * Met à jour le statut d'une demande.
- *
- * @param int $requestId Identifiant de la demande.
- * @param string $status Nouveau statut (pending|in_progress|done).
- * @return bool True si la mise à jour a réussi.
- * @throws \InvalidArgumentException Si le statut est invalide.
- */
-public function updateStatus(int $requestId, string $status): bool
-{
-    // ...
-}
+```bash
+sudo apt-get update
+sudo apt-get install doxygen graphviz
 ```
 
-## 8) Bonnes pratiques retenues
-- Toujours documenter les fonctions non triviales.
-- Garder un résumé d'une ligne + balises utiles.
-- Rester cohérent dans les types (`string`, `int`, `bool`, `void`).
-- Mettre à jour les DocBlocks en même temps que le code.
+## 5. Configuration Doxygen du projet
+Un fichier `Doxyfile` est fourni a la racine du projet avec:
+- `INPUT = app routes`
+- `FILE_PATTERNS = *.php`
+- `RECURSIVE = YES`
+- exclusion des dossiers non utiles (`vendor`, `storage`, `tests`, etc.)
+- sortie dans `docs/doxygen/html`
 
-## 9) Vérification rapide avant rendu
+## 6. Generation de la documentation
+Depuis la racine du projet:
+
+```bash
+doxygen Doxyfile
+```
+
+Resultat attendu:
+- index principal: `docs/doxygen/html/index.html`
+
+## 7. Verifications avant rendu
 - `php -l routes/web.php`
 - `php artisan route:list`
-- génération `phpdoc` sans erreur
-- présence du dossier `docs/api`
+- `doxygen Doxyfile`
+- ouverture de `docs/doxygen/html/index.html`
 
-## 10) Livrables
-- Documentation technique: `docs/Documentation-PHPDoc.md`
-- Documentation générée (si commande exécutée): `docs/api/`
+## 8. Ce que l'examinateur doit voir
+- le code contient des DocBlocks sur les elements metier importants;
+- la doc est generee automatiquement avec Doxygen;
+- la structure du projet est comprise rapidement (routes, modele user, logique admin, RGPD).
+
+## 9. Conclusion
+Doxygen permet d'obtenir une documentation claire, navigable en HTML et facile a maintenir. Combine avec des DocBlocks propres, c'est une base solide pour le projet BTS.
