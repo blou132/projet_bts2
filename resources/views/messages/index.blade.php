@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Messagerie | JMI 56</title>
-        <meta name="description" content="Messagerie utilisateur et admin JMI 56.">
+        <meta name="description" content="Messagerie utilisateur et support JMI 56.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,8 +30,8 @@
                     <img src="{{ asset('images/logo-jmi56.png') }}" alt="JMI 56" width="140" height="48">
                 </a>
                 <div class="nav-cta">
-                    @if ($isAdmin)
-                        <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                    @if ($isJmi)
+                        <a class="btn btn-ghost" href="{{ route('admin') }}">Tickets</a>
                     @endif
                     <a class="btn btn-ghost" href="{{ route('home') }}">Retour au site</a>
                     <form method="post" action="{{ route('logout') }}">
@@ -47,10 +47,10 @@
                 <header class="messages-header">
                     <h1>Messagerie</h1>
                     <p class="messages-lead">
-                        @if ($isAdmin)
+                        @if ($isJmi)
                             Repondez aux utilisateurs a partir de leur demande de contact.
                         @else
-                            Discutez avec l'administration a propos de vos demandes.
+                            Discutez avec le support JMI a propos de vos demandes.
                         @endif
                     </p>
                 </header>
@@ -73,7 +73,7 @@
                                 @foreach ($threads as $thread)
                                     <a class="messages-thread {{ $activeThread && $activeThread->id === $thread->id ? 'is-active' : '' }}" href="{{ route('messages.index', ['request' => $thread->id]) }}">
                                         <p class="messages-thread__title">Demande #{{ $thread->id }}</p>
-                                        @if ($isAdmin)
+                                        @if ($isJmi)
                                             <p class="messages-thread__meta">
                                                 @if ($thread->user_id)
                                                     {{ $thread->user_name }} ({{ $thread->user_email }})
@@ -98,14 +98,14 @@
                             <div class="messages-conversation-header">
                                 <h2>Conversation de la demande #{{ $activeThread->id }}</h2>
                                 <p>
-                                    @if ($isAdmin)
+                                    @if ($isJmi)
                                         @if ($activeThread->user_id)
                                             Utilisateur: {{ $activeThread->user_name }} ({{ $activeThread->user_email }})
                                         @else
                                             Demande sans compte: conversation impossible.
                                         @endif
                                     @else
-                                        Vous echangez avec l'administration.
+                                        Vous echangez avec le support JMI.
                                     @endif
                                 </p>
                             </div>
@@ -148,7 +148,7 @@
                                     <label for="message">Votre message</label>
                                     <textarea id="message" name="message" placeholder="Ecrivez votre message" required>{{ old('message') }}</textarea>
                                 </div>
-                                <button class="btn btn-primary" type="submit" @if ($isAdmin && !$activeThread->user_id) disabled @endif>
+                                <button class="btn btn-primary" type="submit" @if ($isJmi && !$activeThread->user_id) disabled @endif>
                                     Envoyer
                                 </button>
                             </form>

@@ -38,15 +38,24 @@
                     <a href="#zone">Zone</a>
                     <a href="#contact">Contact</a>
                     <div class="nav-actions">
-                        @if (session('is_admin'))
+                        @if (session('is_jmi'))
                             <div class="nav-admin">
-                                <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                                <a class="btn btn-ghost" href="{{ route('admin') }}">Tickets</a>
                                 <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                                 <form method="post" action="{{ route('logout') }}">
                                     @csrf
                                     <button class="btn btn-ghost" type="submit">Se déconnecter</button>
                                 </form>
                             </div>
+                        @elseif (session('is_admin'))
+                            <div class="nav-admin">
+                                <span class="nav-user">Compte admin connecté</span>
+                                <form method="post" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                                </form>
+                            </div>
+                            <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                         @elseif (session('user_id'))
                             <div class="nav-admin">
                                 <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
@@ -64,15 +73,24 @@
                     </div>
                 </nav>
                 <div class="nav-cta">
-                    @if (session('is_admin'))
+                    @if (session('is_jmi'))
                         <div class="nav-admin">
-                            <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                            <a class="btn btn-ghost" href="{{ route('admin') }}">Tickets</a>
                             <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                             <form method="post" action="{{ route('logout') }}">
                                 @csrf
                                 <button class="btn btn-ghost" type="submit">Se déconnecter</button>
                             </form>
                         </div>
+                    @elseif (session('is_admin'))
+                        <div class="nav-admin">
+                            <span class="nav-user">Compte admin connecté</span>
+                            <form method="post" action="{{ route('logout') }}">
+                                @csrf
+                                <button class="btn btn-ghost" type="submit">Se déconnecter</button>
+                            </form>
+                        </div>
+                        <a class="btn btn-primary" href="#contact">Devis gratuit</a>
                     @elseif (session('user_id'))
                         <div class="nav-admin">
                             <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>

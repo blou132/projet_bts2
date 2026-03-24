@@ -93,7 +93,7 @@ class WebRoutesTest extends TestCase
             ->assertRedirect(route('home'));
     }
 
-    public function test_admin_routes_redirect_non_admin_to_login(): void
+    public function test_admin_routes_redirect_non_jmi_to_login(): void
     {
         $this->get(route('admin'))->assertRedirect(route('login'));
         $this->get(route('admin.in_progress'))->assertRedirect(route('login'));
@@ -102,7 +102,7 @@ class WebRoutesTest extends TestCase
 
         $this->withSession([
             'user_id' => 1,
-            'is_admin' => false,
+            'is_jmi' => false,
         ])->post(route('admin.requests.status', ['id' => 1]), [
             'status' => 'done',
         ])->assertRedirect(route('login'));
@@ -160,7 +160,7 @@ class WebRoutesTest extends TestCase
             ],
         ]);
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin'))
             ->assertOk()
             ->assertSee('Pending User')
@@ -188,13 +188,13 @@ class WebRoutesTest extends TestCase
             ],
         ]);
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin.in_progress'))
             ->assertOk()
             ->assertSee('In Progress User')
             ->assertDontSee('Done User');
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin.done'))
             ->assertOk()
             ->assertSee('Done User')
@@ -203,7 +203,7 @@ class WebRoutesTest extends TestCase
 
     public function test_admin_search_redirects_to_admin_when_query_is_empty(): void
     {
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin.search', ['q' => '   ']))
             ->assertRedirect(route('admin'));
     }
@@ -229,13 +229,13 @@ class WebRoutesTest extends TestCase
             ],
         ]);
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin.search', ['q' => 'Marie']))
             ->assertOk()
             ->assertSee('Marie Curie')
             ->assertDontSee('Paul Martin');
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin.search', ['q' => '66 66']))
             ->assertOk()
             ->assertSee('Paul Martin');
@@ -253,7 +253,7 @@ class WebRoutesTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $response = $this->withSession(['is_admin' => true])
+        $response = $this->withSession(['is_jmi' => true])
             ->post(route('admin.requests.status', ['id' => 123]), [
                 'status' => 'in_progress',
             ]);
@@ -277,7 +277,7 @@ class WebRoutesTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $response = $this->from(route('admin'))->withSession(['is_admin' => true])
+        $response = $this->from(route('admin'))->withSession(['is_jmi' => true])
             ->post(route('admin.requests.status', ['id' => 124]), [
                 'status' => 'blocked',
             ]);
@@ -302,7 +302,7 @@ class WebRoutesTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $response = $this->withSession(['is_admin' => true])
+        $response = $this->withSession(['is_jmi' => true])
             ->delete(route('admin.requests.delete', ['id' => 125]));
 
         $response->assertSessionHas('admin_status');
@@ -332,7 +332,7 @@ class WebRoutesTest extends TestCase
             ],
         ]);
 
-        $this->withSession(['is_admin' => true])
+        $this->withSession(['is_jmi' => true])
             ->get(route('admin'))
             ->assertOk();
 
@@ -340,16 +340,18 @@ class WebRoutesTest extends TestCase
         $this->assertDatabaseHas('contact_requests', ['id' => 127]);
     }
 
-    public function test_logout_clears_admin_and_user_sessions(): void
+    public function test_logout_clears_internal_and_user_sessions(): void
     {
         $response = $this->withSession([
             'is_admin' => true,
+            'is_jmi' => true,
             'user_id' => 10,
             'user_name' => 'Someone',
         ])->post(route('logout'))
             ->assertRedirect(route('home'));
 
         $response->assertSessionMissing('is_admin');
+        $response->assertSessionMissing('is_jmi');
         $response->assertSessionMissing('user_id');
         $response->assertSessionMissing('user_name');
     }
@@ -360,7 +362,19 @@ class WebRoutesTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_admin_can_open_messages_page(): void
+    public function test_jmi_can_open_messages_page(): void
+    {
+        $this->post(route('login.submit'), [
+            'login' => 'jmi',
+            'password' => 'jmi123',
+        ])->assertRedirect(route('home'));
+
+        $this->get(route('messages.index'))
+            ->assertOk()
+            ->assertSee('Messagerie');
+    }
+
+    public function test_admin_cannot_open_messages_or_tickets(): void
     {
         $this->post(route('login.submit'), [
             'login' => 'admin',
@@ -368,8 +382,10 @@ class WebRoutesTest extends TestCase
         ])->assertRedirect(route('home'));
 
         $this->get(route('messages.index'))
-            ->assertOk()
-            ->assertSee('Messagerie');
+            ->assertRedirect(route('home'));
+
+        $this->get(route('admin'))
+            ->assertRedirect(route('login'));
     }
 
     public function test_user_can_open_own_conversation_from_contact_request(): void
@@ -379,8 +395,8 @@ class WebRoutesTest extends TestCase
             'email' => 'client.user@example.com',
         ]);
         $adminUser = User::factory()->create([
-            'name' => 'Admin JMI 56',
-            'email' => 'admin-system@jmi56.local',
+            'name' => 'JMI Support',
+            'email' => 'jmi-system@jmi56.local',
         ]);
 
         DB::table('contact_requests')->insert([
@@ -437,7 +453,7 @@ class WebRoutesTest extends TestCase
         $this->assertNotNull($contactRequest);
         $this->assertSame($user->id, (int) $contactRequest->user_id);
 
-        $adminUser = DB::table('users')->where('email', 'admin-system@jmi56.local')->first();
+        $adminUser = DB::table('users')->where('email', 'jmi-system@jmi56.local')->first();
         $this->assertNotNull($adminUser);
 
         $this->assertDatabaseHas('messages', [
@@ -449,12 +465,12 @@ class WebRoutesTest extends TestCase
         ]);
     }
 
-    public function test_user_can_send_message_to_admin_for_own_contact_request(): void
+    public function test_user_can_send_message_to_jmi_for_own_contact_request(): void
     {
         $user = User::factory()->create();
         $adminUser = User::factory()->create([
-            'name' => 'Admin JMI 56',
-            'email' => 'admin-system@jmi56.local',
+            'name' => 'JMI Support',
+            'email' => 'jmi-system@jmi56.local',
         ]);
 
         DB::table('contact_requests')->insert([
@@ -515,12 +531,12 @@ class WebRoutesTest extends TestCase
         $this->assertDatabaseCount('messages', 0);
     }
 
-    public function test_admin_can_reply_to_user_on_contact_request_thread(): void
+    public function test_jmi_can_reply_to_user_on_contact_request_thread(): void
     {
         $requester = User::factory()->create();
         $adminUser = User::factory()->create([
-            'name' => 'Admin JMI 56',
-            'email' => 'admin-system@jmi56.local',
+            'name' => 'JMI Support',
+            'email' => 'jmi-system@jmi56.local',
         ]);
 
         DB::table('contact_requests')->insert([
@@ -535,7 +551,7 @@ class WebRoutesTest extends TestCase
         ]);
 
         $response = $this->withSession([
-            'is_admin' => true,
+            'is_jmi' => true,
             'user_id' => $adminUser->id,
             'user_name' => $adminUser->name,
         ])->post(route('messages.send'), [

@@ -19,8 +19,20 @@ if (!defined('ADMIN_PASSWORD')) {
     define('ADMIN_PASSWORD', 'admin123');
 }
 
+if (!defined('JMI_USERNAME')) {
+    define('JMI_USERNAME', 'jmi');
+}
+
+if (!defined('JMI_PASSWORD')) {
+    define('JMI_PASSWORD', 'jmi123');
+}
+
 if (!defined('ADMIN_SYSTEM_EMAIL')) {
     define('ADMIN_SYSTEM_EMAIL', 'admin-system@jmi56.local');
+}
+
+if (!defined('JMI_SYSTEM_EMAIL')) {
+    define('JMI_SYSTEM_EMAIL', 'jmi-system@jmi56.local');
 }
 
 /**
@@ -56,6 +68,42 @@ if (!function_exists('resolveSessionUser')) {
 }
 
 /**
+ * Retourne vrai si la session courante est le compte JMI (acces tickets/messages).
+ *
+ * @param Request $request
+ * @return bool
+ */
+if (!function_exists('canAccessClientDesk')) {
+    function canAccessClientDesk(Request $request): bool
+    {
+        return (bool) $request->session()->get('is_jmi', false);
+    }
+}
+
+/**
+ * Retourne l'identifiant d'un compte systeme (user technique).
+ *
+ * @param string $name
+ * @param string $email
+ * @return int
+ */
+if (!function_exists('resolveSystemUserId')) {
+    function resolveSystemUserId(string $name, string $email): int
+    {
+        $user = User::query()->firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                // Mot de passe technique uniquement pour existence du compte systeme.
+                'password' => Hash::make(Str::random(32)),
+            ]
+        );
+
+        return (int) $user->id;
+    }
+}
+
+/**
  * Retourne l'identifiant de l'utilisateur admin systeme en base.
  *
  * @return int
@@ -65,16 +113,21 @@ if (!function_exists('resolveAdminSystemUserId')) {
     {
         $adminEmail = (string) env('ADMIN_SYSTEM_EMAIL', ADMIN_SYSTEM_EMAIL);
 
-        $admin = User::query()->firstOrCreate(
-            ['email' => $adminEmail],
-            [
-                'name' => 'Admin JMI 56',
-                // Mot de passe technique uniquement pour existence du compte systeme.
-                'password' => Hash::make(Str::random(32)),
-            ]
-        );
+        return resolveSystemUserId('Admin JMI 56', $adminEmail);
+    }
+}
 
-        return (int) $admin->id;
+/**
+ * Retourne l'identifiant de l'utilisateur JMI (support client) en base.
+ *
+ * @return int
+ */
+if (!function_exists('resolveJmiSystemUserId')) {
+    function resolveJmiSystemUserId(): int
+    {
+        $jmiEmail = (string) env('JMI_SYSTEM_EMAIL', JMI_SYSTEM_EMAIL);
+
+        return resolveSystemUserId('JMI Support', $jmiEmail);
     }
 }
 
@@ -85,7 +138,7 @@ Route::get('/', function () {
 
 // Connexion
 Route::get('/login', function (Request $request) {
-    if ($request->session()->get('is_admin') || $request->session()->get('user_id')) {
+    if ($request->session()->get('is_admin') || $request->session()->get('is_jmi') || $request->session()->get('user_id')) {
         return redirect()->route('home');
     }
 
@@ -106,8 +159,26 @@ Route::post('/login', function (Request $request) {
 
         $request->session()->regenerate();
         $request->session()->put('is_admin', true);
+        $request->session()->put('is_jmi', false);
+        $request->session()->put('user_role', 'admin');
         $request->session()->put('user_id', $adminSystemUserId);
         $request->session()->put('user_name', $adminSystemUser?->name ?? 'Admin JMI 56');
+
+        return redirect()->route('home');
+    }
+
+    $jmiUsername = (string) env('JMI_USERNAME', JMI_USERNAME);
+    $jmiPassword = (string) env('JMI_PASSWORD', JMI_PASSWORD);
+    if ($credentials['login'] === $jmiUsername && $credentials['password'] === $jmiPassword) {
+        $jmiSystemUserId = resolveJmiSystemUserId();
+        $jmiSystemUser = User::find($jmiSystemUserId);
+
+        $request->session()->regenerate();
+        $request->session()->put('is_admin', false);
+        $request->session()->put('is_jmi', true);
+        $request->session()->put('user_role', 'jmi');
+        $request->session()->put('user_id', $jmiSystemUserId);
+        $request->session()->put('user_name', $jmiSystemUser?->name ?? 'JMI Support');
 
         return redirect()->route('home');
     }
@@ -116,6 +187,8 @@ Route::post('/login', function (Request $request) {
     if ($user && Hash::check($credentials['password'], $user->password)) {
         $request->session()->regenerate();
         $request->session()->put('is_admin', false);
+        $request->session()->put('is_jmi', false);
+        $request->session()->put('user_role', 'user');
         $request->session()->put('user_id', $user->id);
         $request->session()->put('user_name', $user->name);
 
@@ -128,7 +201,7 @@ Route::post('/login', function (Request $request) {
 })->name('login.submit');
 
 Route::get('/register', function (Request $request) {
-    if ($request->session()->get('is_admin') || $request->session()->get('user_id')) {
+    if ($request->session()->get('is_admin') || $request->session()->get('is_jmi') || $request->session()->get('user_id')) {
         return redirect()->route('home');
     }
 
@@ -149,7 +222,7 @@ Route::post('/register', function (Request $request) {
     ]);
 
     return redirect()->route('login')
-        ->with('auth_success', 'Compte créé. Seul le compte admin peut accéder à l’administration.');
+        ->with('auth_success', 'Compte créé. Seul le compte JMI peut accéder aux tickets et conversations clients.');
 })->name('register.submit');
 
 // Messagerie
@@ -160,6 +233,12 @@ Route::get('/messages', function (Request $request) {
     }
 
     $isAdmin = (bool) $request->session()->get('is_admin');
+    $isJmi = canAccessClientDesk($request);
+
+    if ($isAdmin && !$isJmi) {
+        return redirect()->route('home')
+            ->withErrors(['login' => 'Le compte admin ne peut pas acceder aux conversations clients.']);
+    }
 
     $threadsQuery = DB::table('contact_requests as cr')
         ->leftJoin('users as u', 'u.id', '=', 'cr.user_id')
@@ -175,7 +254,7 @@ Route::get('/messages', function (Request $request) {
         ])
         ->orderByDesc('cr.created_at');
 
-    if (!$isAdmin) {
+    if (!$isJmi) {
         $threadsQuery->where('cr.user_id', $user->id);
     }
 
@@ -212,7 +291,7 @@ Route::get('/messages', function (Request $request) {
             ])
             ->orderBy('m.created_at');
 
-        if (!$isAdmin) {
+        if (!$isJmi) {
             $messagesQuery->where(function ($q) use ($user) {
                 $q->where('m.sender_id', $user->id)
                     ->orWhere('m.receiver_id', $user->id);
@@ -232,7 +311,7 @@ Route::get('/messages', function (Request $request) {
     }
 
     return view('messages.index', [
-        'isAdmin' => $isAdmin,
+        'isJmi' => $isJmi,
         'threads' => $threads,
         'activeThread' => $activeThread,
         'messages' => $messages,
@@ -246,6 +325,12 @@ Route::post('/messages', function (Request $request) {
     }
 
     $isAdmin = (bool) $request->session()->get('is_admin');
+    $isJmi = canAccessClientDesk($request);
+
+    if ($isAdmin && !$isJmi) {
+        return redirect()->route('home')
+            ->withErrors(['login' => 'Le compte admin ne peut pas envoyer de messages clients.']);
+    }
 
     $validated = $request->validate([
         'contact_request_id' => ['required', 'integer', 'exists:contact_requests,id'],
@@ -263,7 +348,7 @@ Route::post('/messages', function (Request $request) {
     }
 
     $receiverId = 0;
-    if ($isAdmin) {
+    if ($isJmi) {
         $receiverId = (int) ($contactRequest->user_id ?? 0);
         if ($receiverId <= 0) {
             return back()->withErrors([
@@ -276,7 +361,7 @@ Route::post('/messages', function (Request $request) {
                 ->withErrors(['message' => 'Acces interdit a cette conversation.']);
         }
 
-        $receiverId = resolveAdminSystemUserId();
+        $receiverId = resolveJmiSystemUserId();
     }
 
     DB::table('messages')->insert([
@@ -317,7 +402,7 @@ Route::post('/messages/{id}/read', function (Request $request, int $id) {
 
 // Admin : listes par statut
 Route::get('/admin', function (Request $request) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -337,7 +422,7 @@ Route::get('/admin', function (Request $request) {
 })->name('admin');
 
 Route::get('/admin/en-cours', function (Request $request) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -357,7 +442,7 @@ Route::get('/admin/en-cours', function (Request $request) {
 })->name('admin.in_progress');
 
 Route::get('/admin/termine', function (Request $request) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -378,7 +463,7 @@ Route::get('/admin/termine', function (Request $request) {
 
 // Admin : recherche globale
 Route::get('/admin/recherche', function (Request $request) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -432,7 +517,7 @@ Route::post('/contact', function (Request $request) {
     if ($sessionUser) {
         DB::table('messages')->insert([
             'sender_id' => $sessionUser->id,
-            'receiver_id' => resolveAdminSystemUserId(),
+            'receiver_id' => resolveJmiSystemUserId(),
             'contact_request_id' => $contactRequestId,
             'message' => $sanitized['message'],
             'status' => 'unread',
@@ -447,7 +532,7 @@ Route::post('/contact', function (Request $request) {
 
 // Admin : mise a jour du statut
 Route::post('/admin/requests/{id}/status', function (Request $request, int $id) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -470,7 +555,7 @@ Route::post('/admin/requests/{id}/status', function (Request $request, int $id) 
 
 // Admin : suppression
 Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
-    if (!$request->session()->get('is_admin')) {
+    if (!canAccessClientDesk($request)) {
         return redirect()->route('login');
     }
 
@@ -482,7 +567,7 @@ Route::delete('/admin/requests/{id}', function (Request $request, int $id) {
 
 // Deconnexion
 Route::post('/logout', function (Request $request) {
-    $request->session()->forget(['is_admin', 'admin_user_id', 'user_id', 'user_name']);
+    $request->session()->forget(['is_admin', 'is_jmi', 'user_role', 'admin_user_id', 'user_id', 'user_name']);
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 

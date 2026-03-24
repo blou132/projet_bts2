@@ -15,8 +15,9 @@ Commandes a executer a la racine du projet:
 
 Acces:
 - site: `http://127.0.0.1:8000`
-- admin: `login=admin` / `mot de passe=admin123`
-- utilisateur demo: `email=demo@jmi56.local` / `mot de passe=demo12345`
+- admin (compte interne, sans acces tickets/messages clients): `login=admin` / `mot de passe=admin123`
+- jmi (compte support client): `login=jmi` / `mot de passe=jmi123`
+- utilisateur demo: `email=exemple@gmail.com` / `mot de passe=123456789`
 
 Test rapide:
 - `php artisan test --testsuite=Feature`
@@ -25,7 +26,7 @@ Test rapide:
 Objectifs du projet:
 - proposer un site vitrine moderne, responsive et lisible;
 - permettre l'envoi de demandes via un formulaire;
-- permettre un suivi admin des demandes (statuts, recherche, suppression);
+- permettre un suivi des demandes (statuts, recherche, suppression) par le compte JMI;
 - appliquer des bases de securite web et de conformite RGPD;
 - produire une documentation technique exploitable pour la maintenance.
 
@@ -36,7 +37,7 @@ Objectifs du projet:
 - carte Google Maps avec fallback iframe;
 - adaptation mobile/desktop.
 
-### Back-office admin
+### Back-office JMI (tickets clients)
 - affichage des demandes par statut: `En attente`, `En cours`, `Termine`;
 - changement de statut;
 - recherche par nom ou telephone;
@@ -48,12 +49,12 @@ Objectifs du projet:
 - route de connexion: `/login`;
 - route de creation de compte utilisateur: `/register`;
 - un utilisateur standard peut se connecter normalement (email + mot de passe);
-- l'admin dispose d'un identifiant unique et d'un mot de passe dedie;
-- seules les sessions admin peuvent acceder aux routes `/admin*`.
+- le compte `admin` existe mais n'a pas acces aux conversations et tickets clients;
+- le compte `jmi` dispose de l'acces aux tickets (`/admin*`) et a la messagerie client.
 
 ### Messagerie utilisateur (nouvelle fonctionnalite)
-- apres avoir cree une demande de contact, un utilisateur connecte peut discuter avec l'admin;
-- l'admin peut lire et repondre aux messages de chaque demande;
+- apres avoir cree une demande de contact, un utilisateur connecte peut discuter avec le support JMI;
+- le compte JMI peut lire et repondre aux messages de chaque demande;
 - structure des messages:
   - `sender_id` (expediteur)
   - `receiver_id` (destinataire)
@@ -138,6 +139,9 @@ Assets front (optionnel):
 - admin:
   - `ADMIN_USERNAME=...`
   - `ADMIN_PASSWORD=...`
+- jmi:
+  - `JMI_USERNAME=...`
+  - `JMI_PASSWORD=...`
 - carte:
   - `GOOGLE_MAPS_KEY=...` (optionnel)
 
@@ -145,12 +149,16 @@ Valeurs par defaut admin si variables absentes:
 - identifiant: `admin`
 - mot de passe: `admin123`
 
+Valeurs par defaut JMI si variables absentes:
+- identifiant: `jmi`
+- mot de passe: `jmi123`
+
 ## 10) Scenario de demonstration (jury)
 1. Ouvrir la page d'accueil et presenter les sections publiques.
 2. Soumettre une demande via le formulaire contact.
 3. Creer un compte utilisateur (`/register`) et montrer la connexion standard.
 4. Montrer qu'un utilisateur standard n'a pas acces a `/admin`.
-5. Se connecter en admin (`/login`) avec l'identifiant admin.
+5. Se connecter avec le compte JMI (`/login`, identifiant `jmi`).
 6. Montrer:
    - tri par statut;
    - passage `En attente` -> `En cours` -> `Termine`;
@@ -158,8 +166,8 @@ Valeurs par defaut admin si variables absentes:
    - suppression;
    - impact visuel des statuts.
 7. Se reconnecter avec un compte utilisateur et montrer la messagerie:
-   - envoi de message a l'admin dans la conversation de la demande;
-   - reponse de l'admin dans la meme conversation;
+   - envoi de message au support JMI dans la conversation de la demande;
+   - reponse du compte JMI dans la meme conversation;
    - passage du statut `unread` a `read`.
 8. (Optionnel infra) Montrer la securite machine:
    - `sudo fail2ban-client status` et jails actives;
@@ -172,8 +180,8 @@ Suite de tests mise en place:
 - tests fonctionnels complets sur les routes metier:
   - accueil, register, login user/admin, logout;
   - formulaire contact (validation + sanitation);
-  - protections admin;
-  - recherche admin, changement de statut, suppression;
+  - protections d'acces (utilisateur/admin/jmi);
+  - recherche tickets, changement de statut, suppression;
   - purge RGPD;
   - messagerie (acces, envoi, lecture, protection d'acces).
 
@@ -201,6 +209,6 @@ Resultat de la derniere execution:
 ## 13) Points d'evaluation BTS couverts
 - analyse du besoin et formalisation des fonctionnalites;
 - conception et implementation d'un service web complet;
-- gestion des acces (utilisateur vs admin);
+- gestion des acces (utilisateur vs admin vs jmi);
 - prise en compte securite et RGPD;
 - qualite logicielle: tests de base + documentation technique.

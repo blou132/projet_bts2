@@ -19,17 +19,25 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $demoUser = User::query()->updateOrCreate([
-            'email' => 'demo@jmi56.local',
+            'email' => 'exemple@gmail.com',
         ], [
             'name' => 'Utilisateur Demo',
-            'password' => Hash::make('demo12345'),
+            'password' => Hash::make('123456789'),
         ]);
 
         $adminSystemEmail = (string) env('ADMIN_SYSTEM_EMAIL', 'admin-system@jmi56.local');
-        $adminSystemUser = User::query()->updateOrCreate([
+        User::query()->updateOrCreate([
             'email' => $adminSystemEmail,
         ], [
             'name' => 'Admin JMI 56',
+            'password' => Hash::make(Str::random(32)),
+        ]);
+
+        $jmiSystemEmail = (string) env('JMI_SYSTEM_EMAIL', 'jmi-system@jmi56.local');
+        $jmiSystemUser = User::query()->updateOrCreate([
+            'email' => $jmiSystemEmail,
+        ], [
+            'name' => 'JMI Support',
             'password' => Hash::make(Str::random(32)),
         ]);
 
@@ -58,7 +66,7 @@ class DatabaseSeeder extends Seeder
         DB::table('messages')->insert([
             [
                 'sender_id' => $demoUser->id,
-                'receiver_id' => $adminSystemUser->id,
+                'receiver_id' => $jmiSystemUser->id,
                 'contact_request_id' => $contactRequestId,
                 'message' => 'Bonjour, je peux passer quand pour le depot ?',
                 'status' => 'read',
@@ -66,7 +74,7 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
-                'sender_id' => $adminSystemUser->id,
+                'sender_id' => $jmiSystemUser->id,
                 'receiver_id' => $demoUser->id,
                 'contact_request_id' => $contactRequestId,
                 'message' => 'Bonjour, vous pouvez passer demain entre 9h30 et 12h.',

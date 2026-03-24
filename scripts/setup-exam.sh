@@ -34,6 +34,9 @@ update_env_var "QUEUE_CONNECTION" "database"
 update_env_var "ADMIN_USERNAME" "admin"
 update_env_var "ADMIN_PASSWORD" "admin123"
 update_env_var "ADMIN_SYSTEM_EMAIL" "admin-system@jmi56.local"
+update_env_var "JMI_USERNAME" "jmi"
+update_env_var "JMI_PASSWORD" "jmi123"
+update_env_var "JMI_SYSTEM_EMAIL" "jmi-system@jmi56.local"
 
 echo "[2/5] Installation des dependances PHP..."
 if [ ! -d "$ROOT_DIR/vendor" ]; then
@@ -51,7 +54,8 @@ echo "[5/5] Termine."
 echo
 echo "Comptes de demonstration:"
 echo "- Admin: identifiant=admin / mot de passe=admin123"
-echo "- Utilisateur: email=demo@jmi56.local / mot de passe=demo12345"
+echo "- JMI (tickets/messages clients): identifiant=jmi / mot de passe=jmi123"
+echo "- Utilisateur: email=exemple@gmail.com / mot de passe=123456789"
 echo
 echo "Lancement:"
 echo "- php artisan serve"
