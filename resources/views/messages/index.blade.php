@@ -71,6 +71,14 @@
                         @else
                             <div class="messages-thread-list">
                                 @foreach ($threads as $thread)
+                                    @php
+                                        $requestStatusLabel = match ($thread->status) {
+                                            'pending' => 'En attente',
+                                            'in_progress' => 'En cours',
+                                            'done' => 'Terminé',
+                                            default => (string) $thread->status,
+                                        };
+                                    @endphp
                                     <a class="messages-thread {{ $activeThread && $activeThread->id === $thread->id ? 'is-active' : '' }}" href="{{ route('messages.index', ['request' => $thread->id]) }}">
                                         <p class="messages-thread__title">Demande #{{ $thread->id }}</p>
                                         @if ($isJmi)
@@ -84,7 +92,7 @@
                                         @else
                                             <p class="messages-thread__meta">{{ $thread->name }} · {{ $thread->phone }}</p>
                                         @endif
-                                        <p class="messages-thread__status">Statut demande: {{ $thread->status }}</p>
+                                        <p class="messages-thread__status">Statut demande: {{ $requestStatusLabel }}</p>
                                     </a>
                                 @endforeach
                             </div>
