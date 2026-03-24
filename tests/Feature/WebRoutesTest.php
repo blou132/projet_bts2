@@ -42,6 +42,22 @@ class WebRoutesTest extends TestCase
         ]);
     }
 
+    public function test_register_rejects_profanity_in_name(): void
+    {
+        $response = $this->from(route('register'))->post(route('register.submit'), [
+            'name' => 'Con',
+            'email' => 'profanity@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertRedirect(route('register'));
+        $response->assertSessionHasErrors('name');
+        $this->assertDatabaseMissing('users', [
+            'email' => 'profanity@example.com',
+        ]);
+    }
+
     public function test_user_can_login_with_email_and_password(): void
     {
         $user = User::factory()->create([
@@ -136,6 +152,19 @@ class WebRoutesTest extends TestCase
 
         $response->assertRedirect(route('home'));
         $response->assertSessionHasErrors('phone');
+        $this->assertDatabaseCount('contact_requests', 0);
+    }
+
+    public function test_contact_form_rejects_profanity_in_message(): void
+    {
+        $response = $this->from(route('home'))->post(route('contact.submit'), [
+            'name' => 'Jean',
+            'phone' => '06 12 34 56 78',
+            'message' => 'Ceci est de la merde',
+        ]);
+
+        $response->assertRedirect(route('home'));
+        $response->assertSessionHasErrors('message');
         $this->assertDatabaseCount('contact_requests', 0);
     }
 
@@ -501,6 +530,40 @@ class WebRoutesTest extends TestCase
             'message' => 'Question utilisateur',
             'status' => 'unread',
         ]);
+    }
+
+    public function test_user_cannot_send_message_with_profanity(): void
+    {
+        $user = User::factory()->create();
+        User::factory()->create([
+            'name' => 'JMI Support',
+            'email' => 'jmi-system@jmi56.local',
+        ]);
+
+        DB::table('contact_requests')->insert([
+            'id' => 799,
+            'name' => $user->name,
+            'phone' => '06 39 39 39 39',
+            'message' => 'Demande 799',
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withSession([
+            'is_admin' => false,
+            'is_jmi' => false,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+        ])->from(route('messages.index', ['request' => 799]))->post(route('messages.send'), [
+            'contact_request_id' => 799,
+            'message' => 'putain test',
+        ]);
+
+        $response->assertRedirect(route('messages.index', ['request' => 799]));
+        $response->assertSessionHasErrors('message');
+        $this->assertDatabaseCount('messages', 0);
     }
 
     public function test_user_cannot_send_message_on_another_user_contact_request(): void

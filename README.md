@@ -55,6 +55,7 @@ Objectifs du projet:
 ### Messagerie utilisateur (nouvelle fonctionnalite)
 - apres avoir cree une demande de contact, un utilisateur connecte peut discuter avec le support JMI;
 - le compte JMI peut lire et repondre aux messages de chaque demande;
+- filtre anti-profanite sur les textes saisis (contact, messagerie, nom utilisateur);
 - structure des messages:
   - `sender_id` (expediteur)
   - `receiver_id` (destinataire)
@@ -67,6 +68,7 @@ Objectifs du projet:
 ## 4) Securite et RGPD
 - validation serveur Laravel sur les formulaires (`$request->validate(...)`);
 - nettoyage des champs texte du formulaire contact (`trim`, `strip_tags`);
+- blocage des messages contenant des mots interdits (anti-profanite);
 - regeneration de session a la connexion;
 - protection CSRF via Blade (`@csrf`);
 - purge automatique des demandes anciennes selon `GDPR_RETENTION_DAYS`.

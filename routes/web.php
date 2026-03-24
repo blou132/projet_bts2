@@ -35,6 +35,19 @@ if (!defined('JMI_SYSTEM_EMAIL')) {
     define('JMI_SYSTEM_EMAIL', 'jmi-system@jmi56.local');
 }
 
+if (!defined('PROFANITY_TERMS')) {
+    define('PROFANITY_TERMS', [
+        'merde',
+        'putain',
+        'connard',
+        'con',
+        'fdp',
+        'shit',
+        'fuck',
+        'bitch',
+    ]);
+}
+
 /**
  * Supprime les demandes de contact depassant la duree de conservation RGPD.
  *
@@ -64,6 +77,45 @@ if (!function_exists('resolveSessionUser')) {
         }
 
         return User::find($userId);
+    }
+}
+
+/**
+ * Normalise un texte pour verification anti-profanite.
+ *
+ * @param string $text
+ * @return string
+ */
+if (!function_exists('normalizeForModeration')) {
+    function normalizeForModeration(string $text): string
+    {
+        $ascii = Str::lower(Str::ascii($text));
+        $ascii = preg_replace('/[^a-z0-9\\s]/', ' ', $ascii) ?? '';
+        return trim(preg_replace('/\\s+/', ' ', $ascii) ?? '');
+    }
+}
+
+/**
+ * Retourne vrai si le texte contient un mot interdit.
+ *
+ * @param string $text
+ * @return bool
+ */
+if (!function_exists('containsProfanity')) {
+    function containsProfanity(string $text): bool
+    {
+        $normalizedText = normalizeForModeration($text);
+        if ($normalizedText === '') {
+            return false;
+        }
+
+        foreach (PROFANITY_TERMS as $term) {
+            if (preg_match('/\\b' . preg_quote((string) $term, '/') . '\\b/', $normalizedText) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -215,8 +267,15 @@ Route::post('/register', function (Request $request) {
         'password' => ['required', 'string', 'min:8', 'confirmed'],
     ]);
 
+    $cleanName = trim(strip_tags($validated['name']));
+    if (containsProfanity($cleanName)) {
+        return back()
+            ->withErrors(['name' => 'Le nom contient des mots non autorises.'])
+            ->withInput();
+    }
+
     User::create([
-        'name' => trim($validated['name']),
+        'name' => $cleanName,
         'email' => trim($validated['email']),
         'password' => Hash::make($validated['password']),
     ]);
@@ -364,11 +423,18 @@ Route::post('/messages', function (Request $request) {
         $receiverId = resolveJmiSystemUserId();
     }
 
+    $cleanMessage = trim(strip_tags($validated['message']));
+    if (containsProfanity($cleanMessage)) {
+        return back()
+            ->withErrors(['message' => 'Votre message contient des mots non autorises.'])
+            ->withInput();
+    }
+
     DB::table('messages')->insert([
         'sender_id' => $user->id,
         'receiver_id' => $receiverId,
         'contact_request_id' => (int) $validated['contact_request_id'],
-        'message' => trim(strip_tags($validated['message'])),
+        'message' => $cleanMessage,
         'status' => 'unread',
         'created_at' => now(),
         'updated_at' => now(),
@@ -503,6 +569,18 @@ Route::post('/contact', function (Request $request) {
         'phone' => trim(strip_tags($validated['phone'])),
         'message' => trim(strip_tags($validated['message'])),
     ];
+
+    if (containsProfanity($sanitized['name'])) {
+        return back()
+            ->withErrors(['name' => 'Le nom contient des mots non autorises.'])
+            ->withInput();
+    }
+
+    if (containsProfanity($sanitized['message'])) {
+        return back()
+            ->withErrors(['message' => 'Votre message contient des mots non autorises.'])
+            ->withInput();
+    }
 
     $contactRequestId = DB::table('contact_requests')->insertGetId([
         'name' => $sanitized['name'],
