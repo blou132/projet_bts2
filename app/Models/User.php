@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -44,5 +45,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * @return HasMany<ContactRequest, $this>
+     */
+    public function contactRequests(): HasMany
+    {
+        return $this->hasMany(ContactRequest::class);
+    }
+
+    /**
+     * @return HasMany<Message, $this>
+     */
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * @return HasMany<Message, $this>
+     */
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
     }
 }
