@@ -135,7 +135,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
   padding: 0.8rem 0;
   position: relative;
 }
@@ -154,13 +154,17 @@ textarea {
 .nav-links {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
   font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .nav-links a {
   position: relative;
   padding-bottom: 0.3rem;
+  white-space: nowrap;
 }
 
 .nav-links a::after {
@@ -183,6 +187,12 @@ textarea {
   display: flex;
   gap: 0.6rem;
   align-items: center;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.nav-cta .btn {
+  white-space: nowrap;
 }
 
 .nav-actions {
@@ -196,7 +206,11 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.nav-admin .btn {
+  white-space: nowrap;
 }
 
 .nav-admin form {
@@ -213,6 +227,9 @@ textarea {
   color: var(--muted);
   font-size: 0.9rem;
   white-space: nowrap;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-toggle {
@@ -1268,6 +1285,20 @@ footer {
     position: static;
     margin-top: 1rem;
     display: inline-flex;
+  }
+}
+
+@media (max-width: 1240px) and (min-width: 961px) {
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .nav-user {
+    max-width: 170px;
+  }
+
+  .nav-cta .btn {
+    padding-inline: 1rem;
   }
 }
 
