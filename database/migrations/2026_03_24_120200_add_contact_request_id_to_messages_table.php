@@ -11,8 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('messages', 'contact_request_id')) {
+            Schema::table('messages', function (Blueprint $table) {
+                $table->unsignedBigInteger('contact_request_id')->nullable()->after('receiver_id');
+                $table->index('contact_request_id', 'messages_contact_request_id_index');
+            });
+        }
+
         Schema::table('messages', function (Blueprint $table) {
-            $table->foreignId('contact_request_id')->nullable()->constrained('contact_requests')->cascadeOnDelete()->index();
+            $table->foreign('contact_request_id', 'messages_contact_request_id_foreign')
+                ->references('id')
+                ->on('contact_requests')
+                ->cascadeOnDelete();
         });
     }
 
@@ -22,7 +32,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            $table->dropForeign(['contact_request_id']);
+            $table->dropForeign('messages_contact_request_id_foreign');
+            $table->dropIndex('messages_contact_request_id_index');
             $table->dropColumn('contact_request_id');
         });
     }

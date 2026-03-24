@@ -3,8 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +18,62 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $demoUser = User::query()->updateOrCreate([
+            'email' => 'demo@jmi56.local',
+        ], [
+            'name' => 'Utilisateur Demo',
+            'password' => Hash::make('demo12345'),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $adminSystemEmail = (string) env('ADMIN_SYSTEM_EMAIL', 'admin-system@jmi56.local');
+        $adminSystemUser = User::query()->updateOrCreate([
+            'email' => $adminSystemEmail,
+        ], [
+            'name' => 'Admin JMI 56',
+            'password' => Hash::make(Str::random(32)),
+        ]);
+
+        $now = now();
+
+        $contactRequestId = DB::table('contact_requests')->insertGetId([
+            'name' => 'Utilisateur Demo',
+            'phone' => '06 12 34 56 78',
+            'message' => 'Bonjour, je souhaite un diagnostic de mon PC portable.',
+            'status' => 'pending',
+            'user_id' => $demoUser->id,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('contact_requests')->insert([
+            'name' => 'Prospect Externe',
+            'phone' => '02 97 00 11 22',
+            'message' => 'Demande de devis pour installation poste bureautique.',
+            'status' => 'in_progress',
+            'user_id' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('messages')->insert([
+            [
+                'sender_id' => $demoUser->id,
+                'receiver_id' => $adminSystemUser->id,
+                'contact_request_id' => $contactRequestId,
+                'message' => 'Bonjour, je peux passer quand pour le depot ?',
+                'status' => 'read',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'sender_id' => $adminSystemUser->id,
+                'receiver_id' => $demoUser->id,
+                'contact_request_id' => $contactRequestId,
+                'message' => 'Bonjour, vous pouvez passer demain entre 9h30 et 12h.',
+                'status' => 'unread',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
     }
 }

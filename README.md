@@ -5,7 +5,23 @@
 Projet web realise dans le cadre du BTS SIO.
 Le site presente l'activite d'un reparateur informatique local (JMI 56) et integre un back-office pour traiter les demandes clients.
 
-## 1) Contexte et objectif
+## 1) Demarrage express examinateur (cle en main)
+Objectif: lancer le projet en moins de 5 minutes, sans config MySQL manuelle (mode SQLite demo).
+
+Commandes a executer a la racine du projet:
+- `cp .env.example .env`
+- `./scripts/setup-exam.sh`
+- `php artisan serve`
+
+Acces:
+- site: `http://127.0.0.1:8000`
+- admin: `login=admin` / `mot de passe=admin123`
+- utilisateur demo: `email=demo@jmi56.local` / `mot de passe=demo12345`
+
+Test rapide:
+- `php artisan test --testsuite=Feature`
+
+## 2) Contexte et objectif
 Objectifs du projet:
 - proposer un site vitrine moderne, responsive et lisible;
 - permettre l'envoi de demandes via un formulaire;
@@ -13,7 +29,7 @@ Objectifs du projet:
 - appliquer des bases de securite web et de conformite RGPD;
 - produire une documentation technique exploitable pour la maintenance.
 
-## 2) Fonctionnalites realisees
+## 3) Fonctionnalites realisees
 ### Site public
 - sections: accueil, presentation, services, zone, partenaire, contact, mentions legales;
 - formulaire de demande: nom, telephone, message;
@@ -47,21 +63,41 @@ Objectifs du projet:
 - organisation par conversation (une conversation = une demande de contact);
 - statut de lecture gere (`unread` -> `read`).
 
-## 3) Securite et RGPD
+## 4) Securite et RGPD
 - validation serveur Laravel sur les formulaires (`$request->validate(...)`);
 - nettoyage des champs texte du formulaire contact (`trim`, `strip_tags`);
 - regeneration de session a la connexion;
 - protection CSRF via Blade (`@csrf`);
 - purge automatique des demandes anciennes selon `GDPR_RETENTION_DAYS`.
 
-## 4) Stack technique
+## 5) Stack technique
 - Laravel 12;
 - PHP 8.3;
-- MySQL (tables `users`, `contact_requests`, `messages`, `sessions`);
+- MySQL / MariaDB (tables `users`, `contact_requests`, `messages`, `sessions`);
 - Vite (build front);
 - CSS personnalise.
 
-## 5) Fichiers importants du projet
+## 6) Securite systeme et outils infra (local machine)
+Mise en place locale realisee le 24 mars 2026:
+- Fail2ban actif avec jails:
+  - `sshd`
+  - `apache-auth`
+  - `apache-badbots`
+- fichier principal: `/etc/fail2ban/jail.local`
+- verification:
+  - `sudo fail2ban-client status`
+  - `sudo fail2ban-client status sshd`
+
+GLPI installe en local pour la gestion IT:
+- URL locale: `http://127.0.0.1/glpi/`
+- version: `11.0.6`
+- Apache + MariaDB + cron GLPI (`/etc/cron.d/glpi`) actives.
+
+Important:
+- ne pas versionner les mots de passe dans Git;
+- definir ses identifiants admin GLPI en local et les changer apres installation.
+
+## 7) Fichiers importants du projet
 - `routes/web.php`: logique metier principale (auth, admin, contact, RGPD);
 - `resources/views/welcome.blade.php`: interface publique;
 - `resources/views/admin/index.blade.php`: interface admin;
@@ -73,10 +109,12 @@ Objectifs du projet:
 - `database/migrations/2026_03_24_120000_create_messages_table.php`: migration messagerie;
 - `database/migrations/2026_03_24_120100_add_user_id_to_contact_requests_table.php`: liaison demande -> utilisateur;
 - `database/migrations/2026_03_24_120200_add_contact_request_id_to_messages_table.php`: liaison message -> demande;
+- `database/seeders/DatabaseSeeder.php`: donnees de demonstration pour l'oral;
+- `scripts/setup-exam.sh`: script de preparation automatique "jury";
 - `docs/Documentation-PHPDoc.md`: documentation technique (DocBlock + Doxygen);
 - `Doxyfile`: configuration Doxygen.
 
-## 6) Installation et lancement
+## 8) Installation et lancement
 1. Cloner le projet.
 2. Installer les dependances PHP:
    - `composer install`
@@ -96,7 +134,7 @@ Assets front (optionnel):
 - `npm run dev` (developpement)
 - `npm run build` (production)
 
-## 7) Configuration utile (.env)
+## 9) Configuration utile (.env)
 - admin:
   - `ADMIN_USERNAME=...`
   - `ADMIN_PASSWORD=...`
@@ -107,7 +145,7 @@ Valeurs par defaut admin si variables absentes:
 - identifiant: `admin`
 - mot de passe: `admin123`
 
-## 8) Scenario de demonstration (jury)
+## 10) Scenario de demonstration (jury)
 1. Ouvrir la page d'accueil et presenter les sections publiques.
 2. Soumettre une demande via le formulaire contact.
 3. Creer un compte utilisateur (`/register`) et montrer la connexion standard.
@@ -123,8 +161,11 @@ Valeurs par defaut admin si variables absentes:
    - envoi de message a l'admin dans la conversation de la demande;
    - reponse de l'admin dans la meme conversation;
    - passage du statut `unread` a `read`.
+8. (Optionnel infra) Montrer la securite machine:
+   - `sudo fail2ban-client status` et jails actives;
+   - acces GLPI en local (`/glpi`).
 
-## 9) Tests et verification
+## 11) Tests et verification
 Suite de tests mise en place:
 - tests unitaires de base;
 - tests feature Laravel;
@@ -147,16 +188,17 @@ Verification complementaire:
 - `php artisan route:list`
 
 Resultat de la derniere execution:
-- `30 passed (107 assertions)`
+- `29 passed (106 assertions)` sur `php artisan test --testsuite=Feature`
 
-## 10) Documentation technique
+## 12) Documentation technique
+- guide examinateur: `docs/Guide-Examinateur.md`
 - documentation projet: `docs/Documentation-PHPDoc.md`
 - generation Doxygen:
   - installation: `sudo apt-get install doxygen graphviz`
   - generation: `doxygen Doxyfile`
   - sortie: `docs/doxygen/html/index.html`
 
-## 11) Points d'evaluation BTS couverts
+## 13) Points d'evaluation BTS couverts
 - analyse du besoin et formalisation des fonctionnalites;
 - conception et implementation d'un service web complet;
 - gestion des acces (utilisateur vs admin);
