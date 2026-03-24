@@ -45,3 +45,4 @@ php artisan route:list
 ## 5) Documentation technique
 - PHPDoc / DocBlocks: `docs/Documentation-PHPDoc.md`
 - Configuration Doxygen: `Doxyfile`
+- Doxygen web (apres lancement du serveur): [http://127.0.0.1:8000/doxygen/index.html](http://127.0.0.1:8000/doxygen/index.html)

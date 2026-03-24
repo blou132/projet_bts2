@@ -42,3 +42,4 @@ php artisan test --testsuite=Feature
 ## Documentation
 - guide examinateur: `docs/Guide-Examinateur.md`
 - doc technique: `docs/Documentation-PHPDoc.md`
+- doxygen (cliquable apres `php artisan serve`): [Ouvrir la doc Doxygen](http://127.0.0.1:8000/doxygen/index.html)

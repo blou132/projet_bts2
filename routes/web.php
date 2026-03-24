@@ -188,6 +188,26 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Documentation Doxygen (lecture directe depuis le navigateur)
+Route::get('/doxygen/{path?}', function (string $path = 'index.html') {
+    $docsRoot = realpath(base_path('docs/doxygen/html'));
+    if ($docsRoot === false) {
+        abort(404);
+    }
+
+    $cleanPath = ltrim($path, '/');
+    if ($cleanPath === '') {
+        $cleanPath = 'index.html';
+    }
+
+    $targetFile = realpath($docsRoot . DIRECTORY_SEPARATOR . $cleanPath);
+    if ($targetFile === false || !is_file($targetFile) || !str_starts_with($targetFile, $docsRoot)) {
+        abort(404);
+    }
+
+    return response()->file($targetFile);
+})->where('path', '.*')->name('doxygen');
+
 // Connexion
 Route::get('/login', function (Request $request) {
     if ($request->session()->get('is_admin') || $request->session()->get('is_jmi') || $request->session()->get('user_id')) {
