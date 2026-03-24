@@ -35,6 +35,18 @@ Objectifs du projet:
 - l'admin dispose d'un identifiant unique et d'un mot de passe dedie;
 - seules les sessions admin peuvent acceder aux routes `/admin*`.
 
+### Messagerie utilisateur (nouvelle fonctionnalite)
+- apres avoir cree une demande de contact, un utilisateur connecte peut discuter avec l'admin;
+- l'admin peut lire et repondre aux messages de chaque demande;
+- structure des messages:
+  - `sender_id` (expediteur)
+  - `receiver_id` (destinataire)
+  - `contact_request_id` (conversation liee a la demande)
+  - `message` (contenu texte)
+  - `status` (`unread` / `read`)
+- organisation par conversation (une conversation = une demande de contact);
+- statut de lecture gere (`unread` -> `read`).
+
 ## 3) Securite et RGPD
 - validation serveur Laravel sur les formulaires (`$request->validate(...)`);
 - nettoyage des champs texte du formulaire contact (`trim`, `strip_tags`);
@@ -45,7 +57,7 @@ Objectifs du projet:
 ## 4) Stack technique
 - Laravel 12;
 - PHP 8.3;
-- MySQL (tables `users`, `contact_requests`, `sessions`);
+- MySQL (tables `users`, `contact_requests`, `messages`, `sessions`);
 - Vite (build front);
 - CSS personnalise.
 
@@ -55,8 +67,12 @@ Objectifs du projet:
 - `resources/views/admin/index.blade.php`: interface admin;
 - `resources/views/auth/login.blade.php`: connexion;
 - `resources/views/auth/register.blade.php`: creation de compte utilisateur;
+- `resources/views/messages/index.blade.php`: interface de messagerie;
 - `resources/css/app.css`: styles globaux;
 - `tests/Feature/WebRoutesTest.php`: tests fonctionnels des routes principales;
+- `database/migrations/2026_03_24_120000_create_messages_table.php`: migration messagerie;
+- `database/migrations/2026_03_24_120100_add_user_id_to_contact_requests_table.php`: liaison demande -> utilisateur;
+- `database/migrations/2026_03_24_120200_add_contact_request_id_to_messages_table.php`: liaison message -> demande;
 - `docs/Documentation-PHPDoc.md`: documentation technique (DocBlock + Doxygen);
 - `Doxyfile`: configuration Doxygen.
 
@@ -103,6 +119,10 @@ Valeurs par defaut admin si variables absentes:
    - recherche;
    - suppression;
    - impact visuel des statuts.
+7. Se reconnecter avec un compte utilisateur et montrer la messagerie:
+   - envoi de message a l'admin dans la conversation de la demande;
+   - reponse de l'admin dans la meme conversation;
+   - passage du statut `unread` a `read`.
 
 ## 9) Tests et verification
 Suite de tests mise en place:
@@ -113,7 +133,8 @@ Suite de tests mise en place:
   - formulaire contact (validation + sanitation);
   - protections admin;
   - recherche admin, changement de statut, suppression;
-  - purge RGPD.
+  - purge RGPD;
+  - messagerie (acces, envoi, lecture, protection d'acces).
 
 Commandes pour lancer les tests:
 - `php artisan test`
@@ -126,7 +147,7 @@ Verification complementaire:
 - `php artisan route:list`
 
 Resultat de la derniere execution:
-- `21 passed (77 assertions)`
+- `30 passed (107 assertions)`
 
 ## 10) Documentation technique
 - documentation projet: `docs/Documentation-PHPDoc.md`

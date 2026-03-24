@@ -41,6 +41,7 @@
                         @if (session('is_admin'))
                             <div class="nav-admin">
                                 <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                                <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                                 <form method="post" action="{{ route('logout') }}">
                                     @csrf
                                     <button class="btn btn-ghost" type="submit">Se déconnecter</button>
@@ -48,6 +49,7 @@
                             </div>
                         @elseif (session('user_id'))
                             <div class="nav-admin">
+                                <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                                 <span class="nav-user">Connecté : {{ session('user_name') }}</span>
                                 <form method="post" action="{{ route('logout') }}">
                                     @csrf
@@ -65,6 +67,7 @@
                     @if (session('is_admin'))
                         <div class="nav-admin">
                             <a class="btn btn-ghost" href="{{ route('admin') }}">Admin</a>
+                            <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                             <form method="post" action="{{ route('logout') }}">
                                 @csrf
                                 <button class="btn btn-ghost" type="submit">Se déconnecter</button>
@@ -72,6 +75,7 @@
                         </div>
                     @elseif (session('user_id'))
                         <div class="nav-admin">
+                            <a class="btn btn-ghost" href="{{ route('messages.index') }}">Messages</a>
                             <span class="nav-user">Connecté : {{ session('user_name') }}</span>
                             <form method="post" action="{{ route('logout') }}">
                                 @csrf

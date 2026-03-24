@@ -70,7 +70,7 @@ class WebRoutesTest extends TestCase
 
         $response->assertRedirect(route('home'));
         $response->assertSessionHas('is_admin', true);
-        $response->assertSessionMissing('user_id');
+        $response->assertSessionHas('user_id');
     }
 
     public function test_login_fails_with_invalid_credentials(): void
@@ -352,5 +352,288 @@ class WebRoutesTest extends TestCase
         $response->assertSessionMissing('is_admin');
         $response->assertSessionMissing('user_id');
         $response->assertSessionMissing('user_name');
+    }
+
+    public function test_messages_page_requires_logged_session(): void
+    {
+        $this->get(route('messages.index'))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_admin_can_open_messages_page(): void
+    {
+        $this->post(route('login.submit'), [
+            'login' => 'admin',
+            'password' => 'admin123',
+        ])->assertRedirect(route('home'));
+
+        $this->get(route('messages.index'))
+            ->assertOk()
+            ->assertSee('Messagerie');
+    }
+
+    public function test_user_can_open_own_conversation_from_contact_request(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Client User',
+            'email' => 'client.user@example.com',
+        ]);
+        $adminUser = User::factory()->create([
+            'name' => 'Admin JMI 56',
+            'email' => 'admin-system@jmi56.local',
+        ]);
+
+        DB::table('contact_requests')->insert([
+            'id' => 700,
+            'name' => 'Client User',
+            'phone' => '06 40 40 40 40',
+            'message' => 'Demande initiale',
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('messages')->insert([
+            'sender_id' => $adminUser->id,
+            'receiver_id' => $user->id,
+            'contact_request_id' => 700,
+            'message' => 'Bonjour, nous avons bien recu votre demande.',
+            'status' => 'unread',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->withSession([
+            'is_admin' => false,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+        ])->get(route('messages.index', ['request' => 700]))
+            ->assertOk()
+            ->assertSee('Demande #700')
+            ->assertSee('Bonjour, nous avons bien recu votre demande.');
+    }
+
+    public function test_logged_user_contact_request_creates_linked_message_thread(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Linked User',
+            'email' => 'linked.user@example.com',
+        ]);
+
+        $response = $this->withSession([
+            'is_admin' => false,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+        ])->post(route('contact.submit'), [
+            'name' => 'Linked User',
+            'phone' => '06 15 15 15 15',
+            'message' => 'Bonjour <b>admin</b>',
+        ]);
+
+        $response->assertRedirect(route('home') . '#contact');
+
+        $contactRequest = DB::table('contact_requests')->where('phone', '06 15 15 15 15')->first();
+        $this->assertNotNull($contactRequest);
+        $this->assertSame($user->id, (int) $contactRequest->user_id);
+
+        $adminUser = DB::table('users')->where('email', 'admin-system@jmi56.local')->first();
+        $this->assertNotNull($adminUser);
+
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $user->id,
+            'receiver_id' => (int) $adminUser->id,
+            'contact_request_id' => (int) $contactRequest->id,
+            'message' => 'Bonjour admin',
+            'status' => 'unread',
+        ]);
+    }
+
+    public function test_user_can_send_message_to_admin_for_own_contact_request(): void
+    {
+        $user = User::factory()->create();
+        $adminUser = User::factory()->create([
+            'name' => 'Admin JMI 56',
+            'email' => 'admin-system@jmi56.local',
+        ]);
+
+        DB::table('contact_requests')->insert([
+            'id' => 701,
+            'name' => $user->name,
+            'phone' => '06 31 31 31 31',
+            'message' => 'Demande 701',
+            'user_id' => $user->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withSession([
+            'is_admin' => false,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+        ])->post(route('messages.send'), [
+            'contact_request_id' => 701,
+            'message' => '<b>Question</b> utilisateur',
+        ]);
+
+        $response->assertRedirect(route('messages.index', ['request' => 701]));
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $user->id,
+            'receiver_id' => $adminUser->id,
+            'contact_request_id' => 701,
+            'message' => 'Question utilisateur',
+            'status' => 'unread',
+        ]);
+    }
+
+    public function test_user_cannot_send_message_on_another_user_contact_request(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        DB::table('contact_requests')->insert([
+            'id' => 702,
+            'name' => 'Owner',
+            'phone' => '06 32 32 32 32',
+            'message' => 'Owner request',
+            'user_id' => $owner->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->withSession([
+            'is_admin' => false,
+            'user_id' => $otherUser->id,
+            'user_name' => $otherUser->name,
+        ])->post(route('messages.send'), [
+            'contact_request_id' => 702,
+            'message' => 'Tentative interdite',
+        ])->assertRedirect(route('messages.index'));
+
+        $this->assertDatabaseCount('messages', 0);
+    }
+
+    public function test_admin_can_reply_to_user_on_contact_request_thread(): void
+    {
+        $requester = User::factory()->create();
+        $adminUser = User::factory()->create([
+            'name' => 'Admin JMI 56',
+            'email' => 'admin-system@jmi56.local',
+        ]);
+
+        DB::table('contact_requests')->insert([
+            'id' => 703,
+            'name' => 'Requester',
+            'phone' => '06 33 33 33 33',
+            'message' => 'Requester request',
+            'user_id' => $requester->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withSession([
+            'is_admin' => true,
+            'user_id' => $adminUser->id,
+            'user_name' => $adminUser->name,
+        ])->post(route('messages.send'), [
+            'contact_request_id' => 703,
+            'message' => 'Reponse admin',
+        ]);
+
+        $response->assertRedirect(route('messages.index', ['request' => 703]));
+        $this->assertDatabaseHas('messages', [
+            'sender_id' => $adminUser->id,
+            'receiver_id' => $requester->id,
+            'contact_request_id' => 703,
+            'message' => 'Reponse admin',
+            'status' => 'unread',
+        ]);
+    }
+
+    public function test_receiver_can_mark_message_as_read_in_thread(): void
+    {
+        $sender = User::factory()->create();
+        $receiver = User::factory()->create();
+
+        DB::table('contact_requests')->insert([
+            'id' => 704,
+            'name' => 'Receiver',
+            'phone' => '06 34 34 34 34',
+            'message' => 'Thread read',
+            'user_id' => $receiver->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('messages')->insert([
+            'id' => 801,
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+            'contact_request_id' => 704,
+            'message' => 'Read me',
+            'status' => 'unread',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->withSession([
+            'is_admin' => false,
+            'user_id' => $receiver->id,
+            'user_name' => $receiver->name,
+        ])->post(route('messages.read', ['id' => 801]), [
+            'request_id' => 704,
+        ]);
+
+        $response->assertRedirect(route('messages.index', ['request' => 704]));
+        $this->assertDatabaseHas('messages', [
+            'id' => 801,
+            'status' => 'read',
+        ]);
+    }
+
+    public function test_non_receiver_cannot_mark_message_as_read(): void
+    {
+        $sender = User::factory()->create();
+        $receiver = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        DB::table('contact_requests')->insert([
+            'id' => 705,
+            'name' => 'Receiver',
+            'phone' => '06 35 35 35 35',
+            'message' => 'Thread secure',
+            'user_id' => $receiver->id,
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('messages')->insert([
+            'id' => 802,
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+            'contact_request_id' => 705,
+            'message' => 'Private message',
+            'status' => 'unread',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->withSession([
+            'is_admin' => false,
+            'user_id' => $otherUser->id,
+            'user_name' => $otherUser->name,
+        ])->post(route('messages.read', ['id' => 802]), [
+            'request_id' => 705,
+        ])->assertRedirect(route('messages.index', ['request' => 705]));
+
+        $this->assertDatabaseHas('messages', [
+            'id' => 802,
+            'status' => 'unread',
+        ]);
     }
 }
