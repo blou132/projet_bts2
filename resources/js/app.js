@@ -98,6 +98,27 @@ const initMap = () => {
 
 window.initMap = initMap;
 
+const COOKIE_CONSENT_KEY = 'cookie_consent';
+let cookieConsentFallback = null;
+
+const readCookieConsent = () => {
+    try {
+        return localStorage.getItem(COOKIE_CONSENT_KEY);
+    } catch (error) {
+        return cookieConsentFallback;
+    }
+};
+
+const writeCookieConsent = (value) => {
+    cookieConsentFallback = value;
+
+    try {
+        localStorage.setItem(COOKIE_CONSENT_KEY, value);
+    } catch (error) {
+        // localStorage peut etre bloque en navigation privee ou par une politique de securite.
+    }
+};
+
 const initCookieBanner = () => {
     const banner = document.querySelector('[data-cookie-banner]');
     if (!banner) {
@@ -106,7 +127,7 @@ const initCookieBanner = () => {
 
     const acceptButton = banner.querySelector('[data-cookie-accept]');
     const rejectButton = banner.querySelector('[data-cookie-reject]');
-    const consentValue = localStorage.getItem('cookie_consent');
+    const consentValue = readCookieConsent();
 
     const hideBanner = () => {
         banner.hidden = true;
@@ -119,7 +140,7 @@ const initCookieBanner = () => {
     };
 
     const setConsent = (value) => {
-        localStorage.setItem('cookie_consent', value);
+        writeCookieConsent(value);
         hideBanner();
         if (value === 'accepted') {
             loadGoogleMapsScript();
@@ -142,6 +163,60 @@ const initCookieBanner = () => {
     if (rejectButton) {
         rejectButton.addEventListener('click', () => setConsent('rejected'));
     }
+};
+
+const initAnchorButtons = () => {
+    const navShell = document.querySelector('.nav-shell');
+
+    const scrollToTarget = (hash) => {
+        if (!hash || !hash.startsWith('#') || hash.length <= 1) {
+            return null;
+        }
+
+        const targetId = decodeURIComponent(hash.slice(1));
+        const target = document.getElementById(targetId);
+        if (!target) {
+            return null;
+        }
+
+        const navOffset = (navShell ? navShell.offsetHeight : 0) + 12;
+        const targetY = target.getBoundingClientRect().top + window.scrollY - navOffset;
+
+        window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth',
+        });
+
+        return target;
+    };
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+        if (link.classList.contains('skip-link')) {
+            return;
+        }
+
+        link.addEventListener('click', (event) => {
+            const hash = link.getAttribute('href') || '';
+            const target = scrollToTarget(hash);
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+            window.history.replaceState(null, '', hash);
+
+            const hasTabIndex = target.hasAttribute('tabindex');
+            if (!hasTabIndex) {
+                target.setAttribute('tabindex', '-1');
+            }
+
+            target.focus({ preventScroll: true });
+
+            if (!hasTabIndex) {
+                target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+            }
+        });
+    });
 };
 
 // UI generale (navigation, scroll, animations, formulaire)
@@ -175,6 +250,7 @@ const initSiteUI = () => {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+    initAnchorButtons();
 
     // Apparition des sections
     const animatedElements = document.querySelectorAll('[data-animate]');
