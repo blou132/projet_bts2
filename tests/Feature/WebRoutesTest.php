@@ -16,7 +16,23 @@ class WebRoutesTest extends TestCase
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('JMI 56');
+            ->assertSee('JMI 56')
+            ->assertSee(route('legal.mentions'))
+            ->assertSee(route('legal.privacy'))
+            ->assertSee("Les informations collectées sont utilisées uniquement pour répondre à votre demande.");
+    }
+
+    public function test_legal_pages_are_accessible(): void
+    {
+        $this->get(route('legal.mentions'))
+            ->assertOk()
+            ->assertSee('Mentions legales')
+            ->assertSee('Responsabilite');
+
+        $this->get(route('legal.privacy'))
+            ->assertOk()
+            ->assertSee('Politique de confidentialite')
+            ->assertSee('Vos droits RGPD');
     }
 
     public function test_register_page_is_accessible_for_guest(): void

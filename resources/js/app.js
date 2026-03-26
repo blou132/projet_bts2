@@ -1,4 +1,27 @@
 // Carte Google avec rayon autour de Ploermel
+const loadGoogleMapsScript = () => {
+    const mapsConfig = document.querySelector('[data-maps-config]');
+    if (!mapsConfig) {
+        return;
+    }
+
+    const apiKey = (mapsConfig.dataset.mapsKey || '').trim();
+    if (!apiKey) {
+        return;
+    }
+
+    if ((window.google && window.google.maps) || document.querySelector('script[data-google-maps-loader]')) {
+        return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleMapsLoader = 'true';
+    document.body.appendChild(script);
+};
+
 const initMap = () => {
     const mapElement = document.getElementById('service-map');
     if (!mapElement || mapElement.dataset.mapInitialized === 'true') {
@@ -75,6 +98,52 @@ const initMap = () => {
 
 window.initMap = initMap;
 
+const initCookieBanner = () => {
+    const banner = document.querySelector('[data-cookie-banner]');
+    if (!banner) {
+        return;
+    }
+
+    const acceptButton = banner.querySelector('[data-cookie-accept]');
+    const rejectButton = banner.querySelector('[data-cookie-reject]');
+    const consentValue = localStorage.getItem('cookie_consent');
+
+    const hideBanner = () => {
+        banner.hidden = true;
+        banner.classList.remove('is-visible');
+    };
+
+    const showBanner = () => {
+        banner.hidden = false;
+        banner.classList.add('is-visible');
+    };
+
+    const setConsent = (value) => {
+        localStorage.setItem('cookie_consent', value);
+        hideBanner();
+        if (value === 'accepted') {
+            loadGoogleMapsScript();
+        }
+    };
+
+    if (consentValue === 'accepted') {
+        hideBanner();
+        loadGoogleMapsScript();
+    } else if (consentValue === 'rejected') {
+        hideBanner();
+    } else {
+        showBanner();
+    }
+
+    if (acceptButton) {
+        acceptButton.addEventListener('click', () => setConsent('accepted'));
+    }
+
+    if (rejectButton) {
+        rejectButton.addEventListener('click', () => setConsent('rejected'));
+    }
+};
+
 // UI generale (navigation, scroll, animations, formulaire)
 const initSiteUI = () => {
     // Menu mobile
@@ -142,6 +211,8 @@ const initSiteUI = () => {
         phoneInput.addEventListener('blur', handlePhoneInput);
         handlePhoneInput();
     }
+
+    initCookieBanner();
 
     // Si la carte est chargee, on initialise
     if (window.google && window.google.maps) {

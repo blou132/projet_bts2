@@ -10,6 +10,8 @@ php artisan serve
 ```
 
 Ouvrir: `http://127.0.0.1:8000`
+- Mentions legales: `http://127.0.0.1:8000/mentions-legales.html`
+- Politique de confidentialite: `http://127.0.0.1:8000/politique-confidentialite.html`
 
 ## 2) Comptes de demonstration
 - Admin (compte interne sans acces tickets/messages clients):

@@ -320,6 +320,10 @@
                                 <label for="message">Message</label>
                                 <textarea id="message" name="message" placeholder="Expliquez votre besoin" required>{{ old('message') }}</textarea>
                             </div>
+                            <p class="rgpd-notice">
+                                Les informations collectées sont utilisées uniquement pour répondre à votre demande.
+                                Conformément au RGPD, vous pouvez exercer vos droits d'accès, de rectification et de suppression en nous contactant.
+                            </p>
                             <button class="btn btn-primary contact-submit" type="submit">Envoyer la demande</button>
                         </form>
                     </div>
@@ -338,12 +342,16 @@
                         </article>
                         <article class="card legal-card">
                             <h3>Hébergement</h3>
-                            <p>À compléter (nom de l’hébergeur, adresse, téléphone).</p>
+                            <p>Consultez la page dédiée pour les informations complètes de l hébergeur.</p>
                         </article>
                         <article class="card legal-card">
                             <h3>Données personnelles</h3>
                             <p>Les informations envoyées via le formulaire sont utilisées uniquement pour répondre aux demandes. Elles sont conservées pendant 12 mois maximum puis supprimées conformément au RGPD.</p>
                         </article>
+                    </div>
+                    <div class="legal-page-links">
+                        <a class="btn btn-ghost" href="{{ route('legal.mentions') }}">Lire les mentions legales</a>
+                        <a class="btn btn-ghost" href="{{ route('legal.privacy') }}">Lire la politique de confidentialite</a>
                     </div>
                 </div>
             </section>
@@ -365,7 +373,8 @@
                         <a class="tag" href="#presentation">Présentation</a>
                         <a class="tag" href="#services">Services</a>
                         <a class="tag" href="#contact">Contact</a>
-                        <a class="tag" href="#mentions-legales">Mentions légales</a>
+                        <a class="tag" href="{{ route('legal.mentions') }}">Mentions légales</a>
+                        <a class="tag" href="{{ route('legal.privacy') }}">Politique de confidentialité</a>
                     </div>
                 </div>
                 <div>
@@ -408,8 +417,16 @@
             </div>
         </footer>
 
-        @if (env('GOOGLE_MAPS_KEY'))
-            <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_KEY') }}&callback=initMap" async defer></script>
-        @endif
+        <div data-maps-config data-maps-key="{{ (string) env('GOOGLE_MAPS_KEY', '') }}"></div>
+
+        <div class="cookie-banner" data-cookie-banner hidden>
+            <p>
+                Ce site utilise des cookies techniques et des services externes (ex: Google Maps) pour améliorer l expérience utilisateur.
+            </p>
+            <div class="cookie-actions">
+                <button class="btn btn-primary" type="button" data-cookie-accept>Accepter</button>
+                <button class="btn btn-ghost" type="button" data-cookie-reject>Refuser</button>
+            </div>
+        </div>
     </body>
 </html>

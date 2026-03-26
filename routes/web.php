@@ -188,6 +188,23 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::get('/mentions-legales.html', function () {
+    return view('legal.mentions-legales', [
+        'ownerFullName' => (string) env('SITE_OWNER_FULLNAME', 'A completer'),
+        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@jmi56.local'),
+        'hostingProvider' => (string) env('SITE_HOSTING_PROVIDER', 'A completer (OVH / Vercel / autre)'),
+        'hostingAddress' => (string) env('SITE_HOSTING_ADDRESS', 'Adresse de l hebergeur a completer'),
+        'hostingPhone' => (string) env('SITE_HOSTING_PHONE', 'Telephone de l hebergeur a completer'),
+    ]);
+})->name('legal.mentions');
+
+Route::get('/politique-confidentialite.html', function () {
+    return view('legal.politique-confidentialite', [
+        'retentionDays' => (int) GDPR_RETENTION_DAYS,
+        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@jmi56.local'),
+    ]);
+})->name('legal.privacy');
+
 // Documentation Doxygen (lecture directe depuis le navigateur)
 Route::get('/doxygen/{path?}', function (string $path = 'index.html') {
     $docsRoot = realpath(base_path('docs/doxygen/html'));

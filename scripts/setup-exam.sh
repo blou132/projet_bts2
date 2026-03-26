@@ -37,6 +37,11 @@ update_env_var "ADMIN_SYSTEM_EMAIL" "admin-system@jmi56.local"
 update_env_var "JMI_USERNAME" "jmi"
 update_env_var "JMI_PASSWORD" "jmi123"
 update_env_var "JMI_SYSTEM_EMAIL" "jmi-system@jmi56.local"
+update_env_var "SITE_OWNER_FULLNAME" "JMI 56"
+update_env_var "SITE_CONTACT_EMAIL" "contact@jmi56.local"
+update_env_var "SITE_HOSTING_PROVIDER" "A completer (OVH / Vercel / autre)"
+update_env_var "SITE_HOSTING_ADDRESS" "A completer"
+update_env_var "SITE_HOSTING_PHONE" "A completer"
 
 echo "[2/5] Installation des dependances PHP..."
 if [ ! -d "$ROOT_DIR/vendor" ]; then

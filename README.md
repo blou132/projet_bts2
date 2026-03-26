@@ -11,6 +11,8 @@ php artisan serve
 
 URL:
 - `http://127.0.0.1:8000`
+- Mentions legales: `http://127.0.0.1:8000/mentions-legales.html`
+- Politique de confidentialite: `http://127.0.0.1:8000/politique-confidentialite.html`
 
 ## Comptes de demo
 - `admin` / `admin123` (compte interne, sans acces tickets/messages clients)
@@ -24,6 +26,8 @@ URL:
 - messagerie utilisateur <-> support JMI
 - filtrage anti-profanite sur les champs texte
 - purge RGPD des anciennes demandes
+- pages legales dediees (mentions + politique de confidentialite)
+- banniere cookies simple (consentement localStorage pour scripts externes)
 
 ## Tests
 ```bash

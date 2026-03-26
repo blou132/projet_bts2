@@ -156,6 +156,10 @@
                                     <label for="message">Votre message</label>
                                     <textarea id="message" name="message" placeholder="Ecrivez votre message" required>{{ old('message') }}</textarea>
                                 </div>
+                                <p class="rgpd-notice">
+                                    Les informations collectées sont utilisées uniquement pour répondre à votre demande.
+                                    Conformément au RGPD, vous pouvez exercer vos droits d'accès, de rectification et de suppression en nous contactant.
+                                </p>
                                 <button class="btn btn-primary" type="submit" @if ($isJmi && !$activeThread->user_id) disabled @endif>
                                     Envoyer
                                 </button>

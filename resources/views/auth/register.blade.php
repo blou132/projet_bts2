@@ -65,6 +65,10 @@
                     <button class="btn btn-primary" type="submit">Créer le compte</button>
                     <a class="btn btn-ghost" href="{{ route('login') }}">Se connecter</a>
                 </div>
+                <p class="rgpd-notice">
+                    Les informations collectées sont utilisées uniquement pour répondre à votre demande.
+                    Conformément au RGPD, vous pouvez exercer vos droits d'accès, de rectification et de suppression en nous contactant.
+                </p>
             </form>
         </main>
     </body>
