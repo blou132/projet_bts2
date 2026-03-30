@@ -62,6 +62,7 @@ echo "Comptes de demonstration:"
 echo "- Admin: identifiant=admin / mot de passe=admin123"
 echo "- JMI (tickets/messages clients): identifiant=client / mot de passe=client123"
 echo "- Utilisateur: email=user@gmail.com / mot de passe=123456789"
+echo "- Donnees fictives: 9 demandes + discussions deja pre-remplies"
 echo
 echo "Lancement:"
 echo "- php artisan serve"
