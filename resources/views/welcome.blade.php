@@ -254,20 +254,6 @@
                 </div>
             </section>
 
-            <!-- Partenaire -->
-            <section class="section" id="partenaire">
-                <div class="container" data-animate>
-                    <h2 class="section-title">Partenaire</h2>
-                    <div class="partner-card">
-                        <div>
-                            <h3>JK informatique</h3>
-                            <p>Partenaire local pour des solutions informatiques complémentaires.</p>
-                        </div>
-                        <a class="btn btn-outline" href="https://www.jkinformatique.com/" target="_blank" rel="noopener">JK informatique</a>
-                    </div>
-                </div>
-            </section>
-
             <!-- Contact -->
             <section class="section section--alt" id="contact">
                 <div class="container">
