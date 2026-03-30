@@ -19,13 +19,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $demoUser = User::query()->updateOrCreate([
-            'email' => 'exemple@gmail.com',
+            'email' => 'user@gmail.com',
         ], [
             'name' => 'Utilisateur Demo',
             'password' => Hash::make('123456789'),
         ]);
 
-        $adminSystemEmail = (string) env('ADMIN_SYSTEM_EMAIL', 'admin-system@jmi56.local');
+        $adminSystemEmail = (string) env('ADMIN_SYSTEM_EMAIL', 'admin-system@example.test');
         User::query()->updateOrCreate([
             'email' => $adminSystemEmail,
         ], [
@@ -33,11 +33,12 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make(Str::random(32)),
         ]);
 
-        $jmiSystemEmail = (string) env('JMI_SYSTEM_EMAIL', 'jmi-system@jmi56.local');
+        $jmiSystemEmail = (string) env('JMI_SYSTEM_EMAIL', 'support-system@example.test');
+        $jmiDisplayName = (string) env('JMI_DISPLAY_NAME', 'Support Demo');
         $jmiSystemUser = User::query()->updateOrCreate([
             'email' => $jmiSystemEmail,
         ], [
-            'name' => 'JMI Support',
+            'name' => $jmiDisplayName,
             'password' => Hash::make(Str::random(32)),
         ]);
 

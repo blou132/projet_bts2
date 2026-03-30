@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Mentions legales | JMI 56</title>
-        <meta name="description" content="Mentions legales du site JMI 56.">
+        <title>Mentions legales | Demo Site</title>
+        <meta name="description" content="Mentions legales du site Demo Site.">
 
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,7 +23,7 @@
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
-                    <img src="{{ asset('images/logo-jmi56.png') }}" alt="JMI 56" width="140" height="48">
+                    <img src="{{ asset('images/logo-fictif.svg') }}" alt="Logo fictif" width="140" height="48">
                 </a>
                 <div class="nav-cta">
                     <a class="btn btn-ghost" href="{{ route('home') }}">Retour au site</a>

@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Messagerie | JMI 56</title>
-        <meta name="description" content="Messagerie utilisateur et support JMI 56.">
+        <title>Messagerie | Demo Site</title>
+        <meta name="description" content="Messagerie utilisateur et support Demo Site.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
-                    <img src="{{ asset('images/logo-jmi56.png') }}" alt="JMI 56" width="140" height="48">
+                    <img src="{{ asset('images/logo-fictif.svg') }}" alt="Logo fictif" width="140" height="48">
                 </a>
                 <div class="nav-cta">
                     @if ($isJmi)
@@ -50,7 +50,7 @@
                         @if ($isJmi)
                             Repondez aux utilisateurs a partir de leur demande de contact.
                         @else
-                            Discutez avec le support JMI a propos de vos demandes.
+                            Discutez avec le support Demo a propos de vos demandes.
                         @endif
                     </p>
                 </header>
@@ -113,7 +113,7 @@
                                             Demande sans compte: conversation impossible.
                                         @endif
                                     @else
-                                        Vous echangez avec le support JMI.
+                                        Vous echangez avec le support Demo.
                                     @endif
                                 </p>
                             </div>

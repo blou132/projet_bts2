@@ -1,6 +1,6 @@
-# JMI 56 - Projet BTS SIO
+# Demo Site - Projet BTS SIO
 
-Projet web Laravel pour la vitrine JMI 56, avec gestion des demandes clients et messagerie.
+Projet web Laravel pour la vitrine Demo Site, avec gestion des demandes clients et messagerie.
 
 ## Demarrage rapide
 ```bash
@@ -16,14 +16,14 @@ URL:
 
 ## Comptes de demo
 - `admin` / `admin123` (compte interne, sans acces tickets/messages clients)
-- `jmi` / `jmi123` (support client: tickets + messages)
-- `exemple@gmail.com` / `123456789` (utilisateur demo)
+- `client` / `client123` (support client: tickets + messages)
+- `user@gmail.com` / `123456789` (utilisateur demo)
 
 ## Fonctions principales
 - formulaire de contact (`nom`, `telephone`, `message`)
 - gestion des demandes par statut (`En attente`, `En cours`, `Termine`)
 - recherche et suppression des demandes
-- messagerie utilisateur <-> support JMI
+- messagerie utilisateur <-> support client
 - filtrage anti-profanite sur les champs texte
 - purge RGPD des anciennes demandes
 - pages legales dediees (mentions + politique de confidentialite)

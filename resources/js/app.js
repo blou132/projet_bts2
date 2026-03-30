@@ -1,4 +1,4 @@
-// Carte Google avec rayon autour de Ploermel
+// Carte Google avec rayon autour de Ville-des-Tests
 const loadGoogleMapsScript = () => {
     const mapsConfig = document.querySelector('[data-maps-config]');
     if (!mapsConfig) {
@@ -31,8 +31,8 @@ const initMap = () => {
         return;
     }
 
-    const fallbackCenter = { lat: 47.9326, lng: -2.3979 };
-    const address = mapElement.dataset.mapAddress || 'Ploërmel, France';
+    const fallbackCenter = { lat: 48.8566, lng: 2.3522 };
+    const address = mapElement.dataset.mapAddress || 'Paris, France';
     const map = new window.google.maps.Map(mapElement, {
         center: fallbackCenter,
         zoom: 10,
@@ -54,7 +54,7 @@ const initMap = () => {
     const marker = new window.google.maps.Marker({
         position: fallbackCenter,
         map,
-        title: 'JMI 56 - Ploërmel',
+        title: 'Demo Site - Ville-des-Tests',
     });
 
     const circle = new window.google.maps.Circle({

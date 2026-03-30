@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Créer un compte | JMI 56</title>
-        <meta name="description" content="Création de compte pour l'espace administrateur JMI 56.">
+        <title>Créer un compte | Demo Site</title>
+        <meta name="description" content="Création de compte pour l'espace administrateur Demo Site.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
         <div class="nav-shell">
             <div class="container nav">
                 <a class="logo" href="{{ route('home') }}#accueil">
-                    <img src="{{ asset('images/logo-jmi56.png') }}" alt="JMI 56" width="140" height="48">
+                    <img src="{{ asset('images/logo-fictif.svg') }}" alt="Logo fictif" width="140" height="48">
                 </a>
                 <div class="nav-cta">
                     <a class="btn btn-ghost" href="{{ route('home') }}">Retour au site</a>

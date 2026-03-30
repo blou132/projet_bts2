@@ -18,15 +18,15 @@ Ouvrir: `http://127.0.0.1:8000`
   - identifiant: `admin`
   - mot de passe: `admin123`
 - JMI (support client):
-  - identifiant: `jmi`
-  - mot de passe: `jmi123`
+  - identifiant: `client`
+  - mot de passe: `client123`
 - Utilisateur:
-  - email: `exemple@gmail.com`
+  - email: `user@gmail.com`
   - mot de passe: `123456789`
 
 ## 3) Parcours de verification conseille
 1. Ouvrir le site public et verifier les sections.
-2. Se connecter avec le compte JMI (`/login`) puis verifier:
+2. Se connecter avec le compte support (`/login`) puis verifier:
    - listing demandes;
    - changement de statut (`En attente`, `En cours`, `Termine`);
    - recherche;

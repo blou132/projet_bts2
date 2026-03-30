@@ -12,11 +12,26 @@ class WebRoutesTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function jmiSystemEmail(): string
+    {
+        return (string) env('JMI_SYSTEM_EMAIL', 'support-system@example.test');
+    }
+
+    private function jmiUsername(): string
+    {
+        return (string) env('JMI_USERNAME', 'client');
+    }
+
+    private function jmiPassword(): string
+    {
+        return (string) env('JMI_PASSWORD', 'client123');
+    }
+
     public function test_home_page_is_accessible(): void
     {
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('JMI 56')
+            ->assertSee('Demo Site')
             ->assertSee(route('legal.mentions'))
             ->assertSee(route('legal.privacy'))
             ->assertSee("Les informations collectées sont utilisées uniquement pour répondre à votre demande.");
@@ -410,8 +425,8 @@ class WebRoutesTest extends TestCase
     public function test_jmi_can_open_messages_page(): void
     {
         $this->post(route('login.submit'), [
-            'login' => 'jmi',
-            'password' => 'jmi123',
+            'login' => $this->jmiUsername(),
+            'password' => $this->jmiPassword(),
         ])->assertRedirect(route('home'));
 
         $this->get(route('messages.index'))
@@ -441,7 +456,7 @@ class WebRoutesTest extends TestCase
         ]);
         $adminUser = User::factory()->create([
             'name' => 'JMI Support',
-            'email' => 'jmi-system@jmi56.local',
+            'email' => $this->jmiSystemEmail(),
         ]);
 
         DB::table('contact_requests')->insert([
@@ -498,7 +513,7 @@ class WebRoutesTest extends TestCase
         $this->assertNotNull($contactRequest);
         $this->assertSame($user->id, (int) $contactRequest->user_id);
 
-        $adminUser = DB::table('users')->where('email', 'jmi-system@jmi56.local')->first();
+        $adminUser = DB::table('users')->where('email', $this->jmiSystemEmail())->first();
         $this->assertNotNull($adminUser);
 
         $this->assertDatabaseHas('messages', [
@@ -515,7 +530,7 @@ class WebRoutesTest extends TestCase
         $user = User::factory()->create();
         $adminUser = User::factory()->create([
             'name' => 'JMI Support',
-            'email' => 'jmi-system@jmi56.local',
+            'email' => $this->jmiSystemEmail(),
         ]);
 
         DB::table('contact_requests')->insert([
@@ -553,7 +568,7 @@ class WebRoutesTest extends TestCase
         $user = User::factory()->create();
         User::factory()->create([
             'name' => 'JMI Support',
-            'email' => 'jmi-system@jmi56.local',
+            'email' => $this->jmiSystemEmail(),
         ]);
 
         DB::table('contact_requests')->insert([
@@ -615,7 +630,7 @@ class WebRoutesTest extends TestCase
         $requester = User::factory()->create();
         $adminUser = User::factory()->create([
             'name' => 'JMI Support',
-            'email' => 'jmi-system@jmi56.local',
+            'email' => $this->jmiSystemEmail(),
         ]);
 
         DB::table('contact_requests')->insert([

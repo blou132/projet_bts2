@@ -20,19 +20,23 @@ if (!defined('ADMIN_PASSWORD')) {
 }
 
 if (!defined('JMI_USERNAME')) {
-    define('JMI_USERNAME', 'jmi');
+    define('JMI_USERNAME', 'client');
 }
 
 if (!defined('JMI_PASSWORD')) {
-    define('JMI_PASSWORD', 'jmi123');
+    define('JMI_PASSWORD', 'client123');
 }
 
 if (!defined('ADMIN_SYSTEM_EMAIL')) {
-    define('ADMIN_SYSTEM_EMAIL', 'admin-system@jmi56.local');
+    define('ADMIN_SYSTEM_EMAIL', 'admin-system@example.test');
 }
 
 if (!defined('JMI_SYSTEM_EMAIL')) {
-    define('JMI_SYSTEM_EMAIL', 'jmi-system@jmi56.local');
+    define('JMI_SYSTEM_EMAIL', 'support-system@example.test');
+}
+
+if (!defined('JMI_DISPLAY_NAME')) {
+    define('JMI_DISPLAY_NAME', 'Support Demo');
 }
 
 if (!defined('PROFANITY_TERMS')) {
@@ -151,6 +155,11 @@ if (!function_exists('resolveSystemUserId')) {
             ]
         );
 
+        if ($user->name !== $name) {
+            $user->name = $name;
+            $user->save();
+        }
+
         return (int) $user->id;
     }
 }
@@ -178,8 +187,9 @@ if (!function_exists('resolveJmiSystemUserId')) {
     function resolveJmiSystemUserId(): int
     {
         $jmiEmail = (string) env('JMI_SYSTEM_EMAIL', JMI_SYSTEM_EMAIL);
+        $jmiDisplayName = (string) env('JMI_DISPLAY_NAME', JMI_DISPLAY_NAME);
 
-        return resolveSystemUserId('JMI Support', $jmiEmail);
+        return resolveSystemUserId($jmiDisplayName, $jmiEmail);
     }
 }
 
@@ -190,18 +200,18 @@ Route::get('/', function () {
 
 Route::get('/mentions-legales.html', function () {
     return view('legal.mentions-legales', [
-        'ownerFullName' => (string) env('SITE_OWNER_FULLNAME', 'A completer'),
-        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@jmi56.local'),
-        'hostingProvider' => (string) env('SITE_HOSTING_PROVIDER', 'A completer (OVH / Vercel / autre)'),
-        'hostingAddress' => (string) env('SITE_HOSTING_ADDRESS', 'Adresse de l hebergeur a completer'),
-        'hostingPhone' => (string) env('SITE_HOSTING_PHONE', 'Telephone de l hebergeur a completer'),
+        'ownerFullName' => (string) env('SITE_OWNER_FULLNAME', 'Jean Exemple'),
+        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@example.test'),
+        'hostingProvider' => (string) env('SITE_HOSTING_PROVIDER', 'Hebergeur Demo SAS'),
+        'hostingAddress' => (string) env('SITE_HOSTING_ADDRESS', '1 Rue des Serveurs, 75001 Paris'),
+        'hostingPhone' => (string) env('SITE_HOSTING_PHONE', '01 11 22 33 44'),
     ]);
 })->name('legal.mentions');
 
 Route::get('/politique-confidentialite.html', function () {
     return view('legal.politique-confidentialite', [
         'retentionDays' => (int) GDPR_RETENTION_DAYS,
-        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@jmi56.local'),
+        'contactEmail' => (string) env('SITE_CONTACT_EMAIL', 'contact@example.test'),
     ]);
 })->name('legal.privacy');
 
@@ -261,13 +271,14 @@ Route::post('/login', function (Request $request) {
     if ($credentials['login'] === $jmiUsername && $credentials['password'] === $jmiPassword) {
         $jmiSystemUserId = resolveJmiSystemUserId();
         $jmiSystemUser = User::find($jmiSystemUserId);
+        $jmiDisplayName = (string) env('JMI_DISPLAY_NAME', JMI_DISPLAY_NAME);
 
         $request->session()->regenerate();
         $request->session()->put('is_admin', false);
         $request->session()->put('is_jmi', true);
         $request->session()->put('user_role', 'jmi');
         $request->session()->put('user_id', $jmiSystemUserId);
-        $request->session()->put('user_name', $jmiSystemUser?->name ?? 'JMI Support');
+        $request->session()->put('user_name', $jmiSystemUser?->name ?? $jmiDisplayName);
 
         return redirect()->route('home');
     }

@@ -1281,6 +1281,10 @@ footer {
   gap: 0.8rem;
 }
 
+.cookie-banner[hidden] {
+  display: none !important;
+}
+
 .cookie-banner p {
   margin: 0;
   font-size: 0.92rem;
