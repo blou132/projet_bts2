@@ -1,0 +1,20 @@
+digraph DiagrammeSequence {
+  graph [rankdir=LR, bgcolor="white", fontname="Helvetica", nodesep=0.8, ranksep=1.0];
+  node [shape=box, style="rounded,filled", fillcolor="#f8f9fb", color="#444444", fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#333333"];
+
+  Utilisateur [label="Utilisateur"];
+  Formulaire [label="Formulaire Contact\n(welcome.blade.php)"];
+  RouteContact [label="Route POST /contact\n(routes/web.php)"];
+  DBContact [label="Table contact_requests"];
+  DBMessage [label="Table messages"];
+  Support [label="Compte support\n(client)"];
+
+  Utilisateur -> Formulaire [label="1. Saisit nom / telephone / message"];
+  Formulaire -> RouteContact [label="2. Envoi POST /contact"];
+  RouteContact -> RouteContact [label="3. Validation + sanitization\n(regex telephone, strip_tags, anti-profanite)"];
+  RouteContact -> DBContact [label="4. Insert demande (status=pending)"];
+  RouteContact -> DBMessage [style=dashed, label="5. Si utilisateur connecte: creation\nmessage initial (unread)"];
+  DBMessage -> Support [style=dashed, label="6. Thread visible dans la messagerie support"];
+  RouteContact -> Formulaire [label="7. Redirect /#contact + message succes"];
+}

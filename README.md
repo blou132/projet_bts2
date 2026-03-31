@@ -65,3 +65,4 @@ php artisan test
 ## Documentation complementaire
 - Guide examinateur: `docs/Guide-Examinateur.md`
 - Documentation PHPDoc/DocBlock: `docs/Documentation-PHPDoc.md`
+- Diagrammes UML (classe, sequence, utilisation): `docs/Diagrammes-UML.md`

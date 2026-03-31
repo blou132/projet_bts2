@@ -1,0 +1,16 @@
+digraph DiagrammeClasse {
+  graph [rankdir=LR, splines=ortho, bgcolor="white", fontname="Helvetica"];
+  node [shape=record, fontname="Helvetica", fontsize=10, color="#333333", style="rounded"];
+  edge [fontname="Helvetica", fontsize=9, color="#444444"];
+
+  User [label="{User|+ id : bigint\l+ name : string\l+ email : string\l+ password : string\l|+ contactRequests()\l+ sentMessages()\l+ receivedMessages()\l}"];
+
+  ContactRequest [label="{ContactRequest|+ id : bigint\l+ user_id : bigint?\l+ name : string\l+ phone : string\l+ message : text\l+ status : enum(pending,in_progress,done)\l|+ user()\l+ messages()\l}"];
+
+  Message [label="{Message|+ id : bigint\l+ sender_id : bigint\l+ receiver_id : bigint\l+ contact_request_id : bigint\l+ message : text\l+ status : enum(unread,read)\l|+ sender()\l+ receiver()\l+ contactRequest()\l}"];
+
+  User -> ContactRequest [label="1 cree 0..*", color="#1f77b4"];
+  ContactRequest -> Message [label="1 contient 0..*", color="#2ca02c"];
+  User -> Message [label="1 envoie 0..* (sender_id)", color="#ff7f0e"];
+  Message -> User [label="* recu par 1 (receiver_id)", color="#9467bd"];
+}

@@ -1,0 +1,44 @@
+digraph DiagrammeUtilisation {
+  graph [rankdir=LR, bgcolor="white", fontname="Helvetica"];
+  node [fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  Visiteur [shape=box, style="rounded,filled", fillcolor="#eef4ff", label="Visiteur"];
+  Utilisateur [shape=box, style="rounded,filled", fillcolor="#eef4ff", label="Utilisateur"];
+  Support [shape=box, style="rounded,filled", fillcolor="#eef4ff", label="Support (client)"];
+  Admin [shape=box, style="rounded,filled", fillcolor="#eef4ff", label="Admin interne"];
+
+  ConsulterSite [shape=ellipse, label="Consulter le site"];
+  EnvoyerDemande [shape=ellipse, label="Envoyer une demande"];
+  CreerCompte [shape=ellipse, label="Creer un compte utilisateur"];
+  SeConnecter [shape=ellipse, label="Se connecter"];
+  LireMessages [shape=ellipse, label="Consulter ses conversations"];
+  EnvoyerMessage [shape=ellipse, label="Envoyer un message"];
+  GererTickets [shape=ellipse, label="Gerer les tickets"];
+  ChangerStatut [shape=ellipse, label="Changer le statut"];
+  RechercherDemandes [shape=ellipse, label="Rechercher une demande"];
+  SupprimerDemande [shape=ellipse, label="Supprimer une demande"];
+  LirePagesLegales [shape=ellipse, label="Consulter les pages legales"];
+
+  Visiteur -> ConsulterSite;
+  Visiteur -> EnvoyerDemande;
+  Visiteur -> LirePagesLegales;
+  Visiteur -> CreerCompte;
+
+  Utilisateur -> SeConnecter;
+  Utilisateur -> LireMessages;
+  Utilisateur -> EnvoyerMessage;
+  Utilisateur -> EnvoyerDemande;
+
+  Support -> SeConnecter;
+  Support -> GererTickets;
+  Support -> LireMessages;
+  Support -> EnvoyerMessage;
+
+  Admin -> SeConnecter;
+  Admin -> ConsulterSite;
+
+  GererTickets -> ChangerStatut [style=dashed, label="inclut"];
+  GererTickets -> RechercherDemandes [style=dashed, label="inclut"];
+  GererTickets -> SupprimerDemande [style=dashed, label="inclut"];
+}
