@@ -12,6 +12,13 @@ cp .env.example .env
 php artisan serve
 ```
 
+Sous Windows/XAMPP (PowerShell), utiliser:
+```powershell
+Copy-Item .env.example .env -Force
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-exam.ps1
+& "C:\xampp\php\php.exe" artisan serve
+```
+
 Ce que fait `./scripts/setup-exam.sh`:
 - configure `.env` pour SQLite
 - cree la base locale
