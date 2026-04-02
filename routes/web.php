@@ -261,7 +261,7 @@ Route::post('/login', function (Request $request) {
         $request->session()->put('is_jmi', false);
         $request->session()->put('user_role', 'admin');
         $request->session()->put('user_id', $adminSystemUserId);
-        $request->session()->put('user_name', $adminSystemUser?->name ?? 'Admin JMI 56');
+        $request->session()->put('user_name', $adminSystemUser?->name ?? 'Admin Client');
 
         return redirect()->route('home');
     }
@@ -329,7 +329,7 @@ Route::post('/register', function (Request $request) {
     ]);
 
     return redirect()->route('login')
-        ->with('auth_success', 'Compte créé. Seul le compte JMI peut accéder aux tickets et conversations clients.');
+        ->with('auth_success', 'Compte cree. Seul le compte client peut acceder aux tickets et conversations clients.');
 })->name('register.submit');
 
 // Messagerie
