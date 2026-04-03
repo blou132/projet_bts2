@@ -62,6 +62,23 @@ if (!defined('LOGIN_FAIL_BAN_SECONDS')) {
 }
 
 /**
+ * Retourne un libelle lisible de la duree de ban.
+ *
+ * @return string
+ */
+if (!function_exists('loginBanLabel')) {
+    function loginBanLabel(): string
+    {
+        if (LOGIN_FAIL_BAN_SECONDS === 3600) {
+            return '1h';
+        }
+
+        $minutes = (int) ceil(LOGIN_FAIL_BAN_SECONDS / 60);
+        return $minutes . ' minute(s)';
+    }
+}
+
+/**
  * Supprime les demandes de contact depassant la duree de conservation RGPD.
  *
  * @return void
@@ -243,9 +260,17 @@ if (!function_exists('recordLoginFailure')) {
     function recordLoginFailure(Request $request): int
     {
         $counterKey = loginFailCounterKey($request);
-        $count = (int) Cache::increment($counterKey);
-        if ($count === 1) {
-            Cache::put($counterKey, 1, now()->addHours(2));
+        $counterTtl = now()->addHours(2);
+
+        // Database cache: increment() renvoie false si la cle n'existe pas.
+        // On initialise donc toujours la cle avant increment.
+        Cache::add($counterKey, 0, $counterTtl);
+        $rawCount = Cache::increment($counterKey);
+        $count = is_numeric($rawCount) ? (int) $rawCount : 0;
+
+        if ($count <= 0) {
+            $count = ((int) Cache::get($counterKey, 0)) + 1;
+            Cache::put($counterKey, $count, $counterTtl);
         }
 
         if ($count >= LOGIN_FAIL_MAX_ATTEMPTS) {
@@ -376,7 +401,9 @@ Route::get('/login', function (Request $request) {
         return redirect()->route('home');
     }
 
-    return view('auth.login');
+    return view('auth.login', [
+        'loginBanRemaining' => loginBanRemainingSeconds($request),
+    ]);
 })->name('login');
 
 Route::post('/login', function (Request $request) {
@@ -391,7 +418,9 @@ Route::post('/login', function (Request $request) {
         $minutes = (int) ceil($banRemaining / 60);
 
         return back()
-            ->withErrors(['login' => 'Trop de tentatives. Reessayez dans ' . $minutes . ' minute(s).'])
+            ->with('login_banned', true)
+            ->with('login_banned_seconds', $banRemaining)
+            ->withErrors(['login' => 'Acces temporairement bloque: banne ' . loginBanLabel() . ' (reste environ ' . $minutes . ' minute(s)).'])
             ->withInput($request->except('password'));
     }
 
@@ -445,10 +474,12 @@ Route::post('/login', function (Request $request) {
 
     $failCount = recordLoginFailure($request);
     if ($failCount >= LOGIN_FAIL_MAX_ATTEMPTS) {
-        $banMinutes = (int) ceil(LOGIN_FAIL_BAN_SECONDS / 60);
+        $banRemaining = loginBanRemainingSeconds($request);
         logAuthFailure($request, (string) $credentials['login'], 'rate_limit_triggered');
         return back()
-            ->withErrors(['login' => 'Trop de tentatives. Reessayez dans ' . $banMinutes . ' minute(s).'])
+            ->with('login_banned', true)
+            ->with('login_banned_seconds', $banRemaining > 0 ? $banRemaining : LOGIN_FAIL_BAN_SECONDS)
+            ->withErrors(['login' => 'Acces temporairement bloque: banne ' . loginBanLabel() . ' apres trop de tentatives.'])
             ->withInput($request->except('password'));
     }
 

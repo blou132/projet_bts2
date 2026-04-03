@@ -165,6 +165,62 @@ const initCookieBanner = () => {
     }
 };
 
+const initLoginBanCountdown = () => {
+    const banBox = document.querySelector('[data-login-ban]');
+    if (!banBox) {
+        return;
+    }
+
+    const timerElement = banBox.querySelector('[data-ban-countdown]');
+    if (!timerElement) {
+        return;
+    }
+
+    const submitButton = document.querySelector('[data-login-submit]');
+    let remainingSeconds = Number.parseInt(banBox.dataset.banSeconds || '0', 10);
+
+    if (!Number.isFinite(remainingSeconds) || remainingSeconds <= 0) {
+        return;
+    }
+
+    const formatDuration = (totalSeconds) => {
+        const safeSeconds = Math.max(0, totalSeconds);
+        const hours = Math.floor(safeSeconds / 3600);
+        const minutes = Math.floor((safeSeconds % 3600) / 60);
+        const seconds = safeSeconds % 60;
+
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const updateUi = () => {
+        timerElement.textContent = formatDuration(remainingSeconds);
+        if (submitButton) {
+            submitButton.disabled = remainingSeconds > 0;
+            submitButton.setAttribute('aria-disabled', remainingSeconds > 0 ? 'true' : 'false');
+        }
+    };
+
+    updateUi();
+
+    const intervalId = window.setInterval(() => {
+        remainingSeconds -= 1;
+
+        if (remainingSeconds <= 0) {
+            remainingSeconds = 0;
+            updateUi();
+
+            const message = banBox.querySelector('[data-ban-message]');
+            if (message) {
+                message.textContent = 'Le blocage est termine. Vous pouvez vous reconnecter.';
+            }
+            window.clearInterval(intervalId);
+            return;
+        }
+
+        updateUi();
+    }, 1000);
+};
+
 const initAnchorButtons = () => {
     const navShell = document.querySelector('.nav-shell');
 
@@ -289,6 +345,7 @@ const initSiteUI = () => {
     }
 
     initCookieBanner();
+    initLoginBanCountdown();
 
     // Si la carte est chargee, on initialise
     if (window.google && window.google.maps) {

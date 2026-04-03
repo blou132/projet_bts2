@@ -181,6 +181,11 @@ class WebRoutesTest extends TestCase
             'password' => 'wrong-password',
         ]);
         $fifthResponse->assertRedirect(route('login'));
+        $fifthResponse->assertSessionHas('login_banned', true);
+        $fifthResponse->assertSessionHas('login_banned_seconds', function ($value) {
+            $seconds = (int) $value;
+            return $seconds > 0 && $seconds <= 3600;
+        });
         $fifthResponse->assertSessionHasErrors('login');
 
         $blockedResponse = $this->from(route('login'))->post(route('login.submit'), [
@@ -189,6 +194,11 @@ class WebRoutesTest extends TestCase
         ]);
 
         $blockedResponse->assertRedirect(route('login'));
+        $blockedResponse->assertSessionHas('login_banned', true);
+        $blockedResponse->assertSessionHas('login_banned_seconds', function ($value) {
+            $seconds = (int) $value;
+            return $seconds > 0 && $seconds <= 3600;
+        });
         $blockedResponse->assertSessionHasErrors('login');
     }
 
@@ -217,6 +227,37 @@ class WebRoutesTest extends TestCase
         $response->assertSessionHas('user_id', $validUser->id);
     }
 
+    public function test_ip_ban_works_with_database_cache_store(): void
+    {
+        config()->set('cache.default', 'database');
+        Cache::flush();
+
+        $validUser = User::factory()->create([
+            'email' => 'database-cache@example.com',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->from(route('login'))->post(route('login.submit'), [
+                'login' => 'unknown@example.com',
+                'password' => 'wrong-password',
+            ])->assertRedirect(route('login'));
+        }
+
+        $blockedResponse = $this->from(route('login'))->post(route('login.submit'), [
+            'login' => $validUser->email,
+            'password' => 'secret123',
+        ]);
+
+        $blockedResponse->assertRedirect(route('login'));
+        $blockedResponse->assertSessionHas('login_banned', true);
+        $blockedResponse->assertSessionHas('login_banned_seconds', function ($value) {
+            $seconds = (int) $value;
+            return $seconds > 0 && $seconds <= 3600;
+        });
+        $blockedResponse->assertSessionHasErrors('login');
+    }
+
     public function test_login_page_redirects_when_session_already_exists(): void
     {
         $this->withSession([
@@ -224,6 +265,22 @@ class WebRoutesTest extends TestCase
             'is_admin' => false,
         ])->get(route('login'))
             ->assertRedirect(route('home'));
+    }
+
+    public function test_login_page_displays_ban_countdown_markup_for_banned_ip(): void
+    {
+        for ($i = 0; $i < 5; $i++) {
+            $this->from(route('login'))->post(route('login.submit'), [
+                'login' => 'unknown@example.com',
+                'password' => 'wrong-password',
+            ])->assertRedirect(route('login'));
+        }
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('data-login-ban', false)
+            ->assertSee('data-ban-countdown', false)
+            ->assertSee('Acces temporairement bloque (1h apres 5 essais).');
     }
 
     public function test_admin_routes_redirect_non_jmi_to_login(): void

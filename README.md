@@ -62,22 +62,29 @@ php artisan test
 
 ## Protection anti brute-force
 Protection applicative integree (active automatiquement):
-- apres 5 mots de passe incorrects depuis une meme IP, la connexion est bloquee 1 heure.
-- aucun parametre manuel supplementaire n est requis pour cette protection.
+- apres 5 tentatives de connexion ratees depuis une meme IP (compte existant ou non), la connexion est bloquee pendant 1 heure.
+- le blocage est automatique, sans commande manuelle.
+- sur `/login`, un message de blocage est affiche avec un timer dynamique `HH:MM:SS`.
+- pendant le blocage, le bouton `Connexion` est desactive puis redevient actif a la fin du timer.
+
+Demonstration rapide:
+1. aller sur `http://127.0.0.1:8000/login`
+2. envoyer 5 fois un mauvais mot de passe (champ mot de passe non vide)
+3. verifier l affichage `Acces temporairement bloque` + timer `01:00:00`
 
 ## Fail2Ban (projet)
-Le projet ecrit les echecs de connexion dans `storage/logs/security.log` avec le motif `AUTH_FAIL`.
-Une jail dediee est fournie pour bannir une IP apres 5 echecs pendant 1 heure.
+Le projet ecrit aussi les echecs de connexion dans `storage/logs/security.log` avec le motif `AUTH_FAIL`.
+Une configuration Fail2Ban est fournie pour un blocage reseau OS (niveau systeme), en complement.
 
 Script de configuration:
 - `scripts/setup-fail2ban.sh`
 
 Point important pour l examinateur:
-- en test local sur `127.0.0.1` (localhost), le blocage peut etre moins visible dans le navigateur.
-- la preuve du bannissement se lit dans les logs systeme:
+- la protection principale de la demo BTS est celle de l application (timer visible sur `/login`).
+- Fail2Ban est optionnel pour la demo locale et sert surtout en contexte serveur Linux.
+- traces consultables:
   - `storage/logs/security.log` (traces `AUTH_FAIL`)
-  - `/var/log/fail2ban.log` (ligne `Ban <IP>`)
-- en production (IP distante), le blocage reseau est net.
+  - `/var/log/fail2ban.log` (si Fail2Ban est installe et actif)
 
 ## Fichiers importants
 - `routes/web.php`

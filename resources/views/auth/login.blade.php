@@ -38,6 +38,13 @@
 
         <!-- Formulaire de connexion -->
         <main id="main" class="auth-page">
+            @php
+                $banSeconds = max((int) session('login_banned_seconds', 0), (int) ($loginBanRemaining ?? 0));
+                $banHours = intdiv($banSeconds, 3600);
+                $banMinutes = intdiv($banSeconds % 3600, 60);
+                $banRemainingSeconds = $banSeconds % 60;
+                $banTimerLabel = sprintf('%02d:%02d:%02d', $banHours, $banMinutes, $banRemainingSeconds);
+            @endphp
             <form class="auth-card" method="post" action="{{ route('login.submit') }}">
                 @csrf
                 <h1>Se connecter</h1>
@@ -47,7 +54,15 @@
                     <div class="auth-success">{{ session('auth_success') }}</div>
                 @endif
 
-                @if ($errors->any())
+                @if ($banSeconds > 0)
+                    <div class="auth-ban" data-login-ban data-ban-seconds="{{ $banSeconds }}">
+                        <p class="auth-ban__title">Acces temporairement bloque (1h apres 5 essais).</p>
+                        <p class="auth-ban__text" data-ban-message>
+                            {{ session('login_banned') ? $errors->first('login') : 'Trop de tentatives de connexion detectees.' }}
+                            Reessayez dans <strong class="auth-ban__timer" data-ban-countdown>{{ $banTimerLabel }}</strong>.
+                        </p>
+                    </div>
+                @elseif ($errors->any())
                     <div class="auth-error">{{ $errors->first() }}</div>
                 @endif
 
@@ -60,7 +75,7 @@
                     <input id="password" name="password" type="password" autocomplete="current-password" required>
                 </div>
                 <div class="auth-actions">
-                    <button class="btn btn-primary" type="submit">Connexion</button>
+                    <button class="btn btn-primary" type="submit" data-login-submit @if ($banSeconds > 0) disabled aria-disabled="true" @endif>Connexion</button>
                     <a class="btn btn-ghost" href="{{ route('register') }}">Créer un compte</a>
                     <a class="btn btn-ghost" href="{{ route('home') }}">Retour</a>
                 </div>
