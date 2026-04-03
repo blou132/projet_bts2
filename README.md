@@ -60,6 +60,25 @@ php artisan migrate:fresh --seed
 php artisan test
 ```
 
+## Protection anti brute-force
+Protection applicative integree (active automatiquement):
+- apres 5 mots de passe incorrects depuis une meme IP, la connexion est bloquee 1 heure.
+- aucun parametre manuel supplementaire n est requis pour cette protection.
+
+## Fail2Ban (projet)
+Le projet ecrit les echecs de connexion dans `storage/logs/security.log` avec le motif `AUTH_FAIL`.
+Une jail dediee est fournie pour bannir une IP apres 5 echecs pendant 1 heure.
+
+Script de configuration:
+- `scripts/setup-fail2ban.sh`
+
+Point important pour l examinateur:
+- en test local sur `127.0.0.1` (localhost), le blocage peut etre moins visible dans le navigateur.
+- la preuve du bannissement se lit dans les logs systeme:
+  - `storage/logs/security.log` (traces `AUTH_FAIL`)
+  - `/var/log/fail2ban.log` (ligne `Ban <IP>`)
+- en production (IP distante), le blocage reseau est net.
+
 ## Fichiers importants
 - `routes/web.php`
 - `database/seeders/DatabaseSeeder.php`
@@ -73,3 +92,4 @@ php artisan test
 - Guide examinateur: `docs/Guide-Examinateur.md`
 - Documentation PHPDoc/DocBlock: `docs/Documentation-PHPDoc.md`
 - Diagrammes UML (classe, sequence, utilisation): `docs/Diagrammes-UML.md`
+- Fail2Ban: `docs/Fail2Ban.md`

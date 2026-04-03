@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,14 @@ if (!defined('PROFANITY_TERMS')) {
         'fuck',
         'bitch',
     ]);
+}
+
+if (!defined('LOGIN_FAIL_MAX_ATTEMPTS')) {
+    define('LOGIN_FAIL_MAX_ATTEMPTS', 5);
+}
+
+if (!defined('LOGIN_FAIL_BAN_SECONDS')) {
+    define('LOGIN_FAIL_BAN_SECONDS', 3600);
 }
 
 /**
@@ -120,6 +129,132 @@ if (!function_exists('containsProfanity')) {
         }
 
         return false;
+    }
+}
+
+/**
+ * Journalise une tentative de connexion echouee pour Fail2Ban.
+ *
+ * Format:
+ * 2026-04-03T13:40:00+00:00 AUTH_FAIL ip=1.2.3.4 login=user@example.test reason=invalid_credentials uri=/login
+ *
+ * @param Request $request
+ * @param string $login
+ * @param string $reason
+ * @return void
+ */
+if (!function_exists('logAuthFailure')) {
+    function logAuthFailure(Request $request, string $login, string $reason = 'invalid_credentials'): void
+    {
+        $ip = (string) ($request->ip() ?? '0.0.0.0');
+        $cleanLogin = trim(strip_tags($login));
+        $cleanLogin = preg_replace('/\s+/', '', $cleanLogin) ?? '';
+        $cleanLogin = Str::lower($cleanLogin);
+        $uri = '/' . ltrim((string) $request->path(), '/');
+
+        $line = sprintf(
+            "%s AUTH_FAIL ip=%s login=%s reason=%s uri=%s\n",
+            now()->toIso8601String(),
+            $ip,
+            $cleanLogin !== '' ? $cleanLogin : 'unknown',
+            $reason,
+            $uri
+        );
+
+        $logDir = storage_path('logs');
+        if (!is_dir($logDir)) {
+            @mkdir($logDir, 0775, true);
+        }
+
+        $logFile = $logDir . DIRECTORY_SEPARATOR . 'security.log';
+        if (@file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX) === false) {
+            logger()->warning('Impossible d ecrire dans security.log', ['path' => $logFile]);
+        }
+    }
+}
+
+/**
+ * Retourne la cle du compteur d'echecs de connexion pour une IP.
+ *
+ * @param Request $request
+ * @return string
+ */
+if (!function_exists('loginFailCounterKey')) {
+    function loginFailCounterKey(Request $request): string
+    {
+        $ip = (string) ($request->ip() ?? '0.0.0.0');
+        return 'auth:v2:fail:count:' . sha1($ip);
+    }
+}
+
+/**
+ * Retourne la cle de ban temporaire de connexion pour une IP.
+ *
+ * @param Request $request
+ * @return string
+ */
+if (!function_exists('loginFailBanKey')) {
+    function loginFailBanKey(Request $request): string
+    {
+        $ip = (string) ($request->ip() ?? '0.0.0.0');
+        return 'auth:v2:fail:ban_until:' . sha1($ip);
+    }
+}
+
+/**
+ * Retourne le nombre de secondes restantes de bannissement pour l'IP.
+ *
+ * @param Request $request
+ * @return int
+ */
+if (!function_exists('loginBanRemainingSeconds')) {
+    function loginBanRemainingSeconds(Request $request): int
+    {
+        $banUntilTimestamp = (int) Cache::get(loginFailBanKey($request), 0);
+        if ($banUntilTimestamp <= 0) {
+            return 0;
+        }
+
+        return max(0, $banUntilTimestamp - now()->getTimestamp());
+    }
+}
+
+/**
+ * Reinitialise l'etat anti brute-force pour l'IP.
+ *
+ * @param Request $request
+ * @return void
+ */
+if (!function_exists('clearLoginFailState')) {
+    function clearLoginFailState(Request $request): void
+    {
+        Cache::forget(loginFailCounterKey($request));
+        Cache::forget(loginFailBanKey($request));
+    }
+}
+
+/**
+ * Enregistre un echec de connexion et applique le ban temporaire si necessaire.
+ *
+ * @param Request $request
+ * @return int Nombre d'echecs consecutifs pour l'IP apres increment.
+ */
+if (!function_exists('recordLoginFailure')) {
+    function recordLoginFailure(Request $request): int
+    {
+        $counterKey = loginFailCounterKey($request);
+        $count = (int) Cache::increment($counterKey);
+        if ($count === 1) {
+            Cache::put($counterKey, 1, now()->addHours(2));
+        }
+
+        if ($count >= LOGIN_FAIL_MAX_ATTEMPTS) {
+            $banUntilTimestamp = now()->addSeconds(LOGIN_FAIL_BAN_SECONDS)->getTimestamp();
+            Cache::put(loginFailBanKey($request), $banUntilTimestamp, now()->addSeconds(LOGIN_FAIL_BAN_SECONDS));
+            Cache::forget($counterKey);
+        }
+
+        return $count;
     }
 }
 
@@ -250,11 +385,22 @@ Route::post('/login', function (Request $request) {
         'password' => ['required', 'string'],
     ]);
 
+    $banRemaining = loginBanRemainingSeconds($request);
+    if ($banRemaining > 0) {
+        logAuthFailure($request, (string) $credentials['login'], 'rate_limited');
+        $minutes = (int) ceil($banRemaining / 60);
+
+        return back()
+            ->withErrors(['login' => 'Trop de tentatives. Reessayez dans ' . $minutes . ' minute(s).'])
+            ->withInput($request->except('password'));
+    }
+
     $adminUsername = (string) env('ADMIN_USERNAME', ADMIN_USERNAME);
     $adminPassword = (string) env('ADMIN_PASSWORD', ADMIN_PASSWORD);
     if ($credentials['login'] === $adminUsername && $credentials['password'] === $adminPassword) {
         $adminSystemUserId = resolveAdminSystemUserId();
         $adminSystemUser = User::find($adminSystemUserId);
+        clearLoginFailState($request);
 
         $request->session()->regenerate();
         $request->session()->put('is_admin', true);
@@ -272,6 +418,7 @@ Route::post('/login', function (Request $request) {
         $jmiSystemUserId = resolveJmiSystemUserId();
         $jmiSystemUser = User::find($jmiSystemUserId);
         $jmiDisplayName = (string) env('JMI_DISPLAY_NAME', JMI_DISPLAY_NAME);
+        clearLoginFailState($request);
 
         $request->session()->regenerate();
         $request->session()->put('is_admin', false);
@@ -285,6 +432,7 @@ Route::post('/login', function (Request $request) {
 
     $user = User::where('email', $credentials['login'])->first();
     if ($user && Hash::check($credentials['password'], $user->password)) {
+        clearLoginFailState($request);
         $request->session()->regenerate();
         $request->session()->put('is_admin', false);
         $request->session()->put('is_jmi', false);
@@ -295,9 +443,20 @@ Route::post('/login', function (Request $request) {
         return redirect()->route('home');
     }
 
+    $failCount = recordLoginFailure($request);
+    if ($failCount >= LOGIN_FAIL_MAX_ATTEMPTS) {
+        $banMinutes = (int) ceil(LOGIN_FAIL_BAN_SECONDS / 60);
+        logAuthFailure($request, (string) $credentials['login'], 'rate_limit_triggered');
+        return back()
+            ->withErrors(['login' => 'Trop de tentatives. Reessayez dans ' . $banMinutes . ' minute(s).'])
+            ->withInput($request->except('password'));
+    }
+
+    logAuthFailure($request, (string) $credentials['login'], 'invalid_credentials');
+
     return back()
         ->withErrors(['login' => 'Identifiant ou mot de passe incorrect.'])
-        ->withInput();
+        ->withInput($request->except('password'));
 })->name('login.submit');
 
 Route::get('/register', function (Request $request) {

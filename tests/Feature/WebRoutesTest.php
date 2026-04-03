@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -11,6 +12,12 @@ use Tests\TestCase;
 class WebRoutesTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush();
+    }
 
     private function jmiSystemEmail(): string
     {
@@ -129,6 +136,85 @@ class WebRoutesTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $response->assertSessionHasErrors('login');
+    }
+
+    public function test_login_failure_is_logged_for_fail2ban(): void
+    {
+        $securityLogPath = storage_path('logs/security.log');
+        if (is_file($securityLogPath)) {
+            @unlink($securityLogPath);
+        }
+
+        $response = $this->from(route('login'))->post(route('login.submit'), [
+            'login' => 'blocked@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('login');
+        $this->assertFileExists($securityLogPath);
+
+        $logContent = file_get_contents($securityLogPath);
+        $this->assertIsString($logContent);
+        $this->assertStringContainsString('AUTH_FAIL ip=127.0.0.1', $logContent);
+        $this->assertStringContainsString('login=blocked@example.com', $logContent);
+        $this->assertStringContainsString('reason=invalid_credentials', $logContent);
+        $this->assertStringContainsString('uri=/login', $logContent);
+    }
+
+    public function test_ip_is_banned_for_one_hour_after_five_failed_attempts(): void
+    {
+        $validUser = User::factory()->create([
+            'email' => 'allowed@example.com',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        for ($i = 0; $i < 4; $i++) {
+            $this->from(route('login'))->post(route('login.submit'), [
+                'login' => 'unknown@example.com',
+                'password' => 'wrong-password',
+            ])->assertRedirect(route('login'));
+        }
+
+        $fifthResponse = $this->from(route('login'))->post(route('login.submit'), [
+            'login' => 'unknown@example.com',
+            'password' => 'wrong-password',
+        ]);
+        $fifthResponse->assertRedirect(route('login'));
+        $fifthResponse->assertSessionHasErrors('login');
+
+        $blockedResponse = $this->from(route('login'))->post(route('login.submit'), [
+            'login' => $validUser->email,
+            'password' => 'secret123',
+        ]);
+
+        $blockedResponse->assertRedirect(route('login'));
+        $blockedResponse->assertSessionHasErrors('login');
+    }
+
+    public function test_ban_expires_after_one_hour_and_login_works_again(): void
+    {
+        $validUser = User::factory()->create([
+            'email' => 'recover@example.com',
+            'password' => Hash::make('secret123'),
+        ]);
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->from(route('login'))->post(route('login.submit'), [
+                'login' => 'unknown@example.com',
+                'password' => 'wrong-password',
+            ])->assertRedirect(route('login'));
+        }
+
+        $this->travel(61)->minutes();
+
+        $response = $this->post(route('login.submit'), [
+            'login' => $validUser->email,
+            'password' => 'secret123',
+        ]);
+
+        $response->assertRedirect(route('home'));
+        $response->assertSessionHas('user_id', $validUser->id);
     }
 
     public function test_login_page_redirects_when_session_already_exists(): void
