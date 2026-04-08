@@ -5,7 +5,7 @@ Projet web Laravel (site vitrine + gestion de demandes + messagerie client/suppo
 ## Objectif du README
 Ce document donne a l examinateur toutes les etapes pour lancer et verifier le projet rapidement.
 
-## Lancement rapide (recommande)
+## Lancement rapide
 ```bash
 cp .env.example .env
 ./scripts/setup-exam.sh
